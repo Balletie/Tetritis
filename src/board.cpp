@@ -14,7 +14,7 @@ bool Board::collides(Tetro& t) {
 		if (fin_x < 0 || fin_x >= BOARD_WIDTH)	return true;
 
 		// coordinates are within board bounds, so we can construct a key.
-		uint16_t key = fin_y * BOARD_WIDTH + fin_x;
+		uint8_t key = fin_y * BOARD_WIDTH + fin_x;
 		if (_data.find(key) == _data.end()) 	continue;
 		else					return true;
 	}
@@ -29,7 +29,7 @@ void Board::record(Tetro& t) {
 
 		const int8_t fin_x = t.getFinalX(bs + i);
 		if (fin_x < 0 || fin_x > BOARD_WIDTH)	return;
-		_data[(uint16_t)fin_y * BOARD_WIDTH + fin_x] = bs[i].getColor();
+		_data[(uint8_t)fin_y * BOARD_WIDTH + fin_x] = bs[i].getColor();
 	}
 }
 
@@ -37,11 +37,11 @@ void Board::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	if(_data.empty()) return;
 
 	sf::VertexArray vertices(sf::Quads, 4*_data.size());
-	typename std::map<uint16_t, sf::Color>::const_iterator it = _data.begin();
+	typename std::map<uint8_t, sf::Color>::const_iterator it = _data.begin();
 
 	for (int i = 0; it != _data.end(); ++it, i++) {
 		sf::Vertex* quad = &vertices[4*i];
-		uint16_t key  = it->first;
+		uint8_t key  = it->first;
 		sf::Color cl = it->second;
 		uint16_t x = CELL_WIDTH_HEIGHT * (key % BOARD_WIDTH);
 		uint16_t y = CELL_WIDTH_HEIGHT * (key / BOARD_WIDTH);
