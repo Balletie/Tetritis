@@ -24,15 +24,15 @@ namespace window {
 							dirty = true;
 							break;
 						case sf::Keyboard::Left:
-	//						current_tetro.move(DIR_LEFT);
+							current_tetro.move(DIR_LEFT);
 							dirty = true;
 							break;
 						case sf::Keyboard::Right:
-	//						current_tetro.move(DIR_RIGHT);
+							current_tetro.move(DIR_RIGHT);
 							dirty = true;
 							break;
 						case sf::Keyboard::Down:
-	//						current_tetro.move(DIR_DOWN);
+							current_tetro.move(DIR_DOWN);
 							dirty = true;
 							break;
 						case sf::Keyboard::Space:
@@ -58,7 +58,7 @@ namespace window {
 	//			if (current_tetro.collides(&board)) current_tetro = Tetro::randomTetro();
 			if (dirty) {
 				window.clear();
-	//				window.draw(board);
+	//			window.draw(board);
 				window.draw(current_tetro);
 				window.display();
 				dirty = false;

@@ -53,6 +53,22 @@ void Tetro::rotateLeft() {
 	}
 }
 
+void Tetro::move(direction d) {
+	switch(d) {
+		case DIR_DOWN:
+			this->_row++;
+		break;
+		case DIR_LEFT:
+			this->_col--;
+		break;
+		case DIR_RIGHT:
+			this->_col++;
+		break;
+		default:
+		break;
+	}
+}
+
 void Tetro::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	sf::VertexArray vertices(sf::Quads, 4*4);
 	for (int i = 0; i < 4; i++) {
