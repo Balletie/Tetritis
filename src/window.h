@@ -1,4 +1,4 @@
-#include "tetro.h"
+#include "board.h"
 #include <stdint.h>
 #include <SFML/Graphics.hpp>
 

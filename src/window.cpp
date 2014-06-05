@@ -1,11 +1,11 @@
 #include "window.h"
-#include <iostream>
 
 namespace window {
 	namespace {
 		bool running = true;
 		bool dirty   = true;
 		sf::RenderWindow window;
+		Board board;
 		Tetro current_tetro(sf::Color::Red, TETRO_ZEE);
 
 		bool handle_input() {
@@ -69,7 +69,9 @@ namespace window {
 	}
 
 	bool open() {
-		window.create(sf::VideoMode(300, 700), "Tetritis", sf::Style::Close | sf::Style::Titlebar);
+		window.create(	sf::VideoMode(16*BOARD_WIDTH, 16*BOARD_HEIGHT),
+				"Tetritis",
+				sf::Style::Close | sf::Style::Titlebar);
 		return true;
 	}
 }
