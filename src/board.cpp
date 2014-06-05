@@ -1,6 +1,5 @@
 #include <SFML/Graphics/VertexArray.hpp>
 #include "board.h"
-#include <iostream>
 
 Board::Board() 
 {}
@@ -30,10 +29,8 @@ void Board::record(Tetro& t) {
 
 		const int8_t fin_x = t.getFinalX(bs + i);
 		if (fin_x < 0 || fin_x > BOARD_WIDTH)	return;
-		std::cout<<'('<<(int)fin_x<<','<<(int)fin_y<<")\n";
 		_data[(uint16_t)fin_y * BOARD_WIDTH + fin_x] = bs[i].getColor();
 	}
-	std::cout<<std::endl;
 }
 
 void Board::draw(sf::RenderTarget& target, sf::RenderStates states) const {

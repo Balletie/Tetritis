@@ -52,12 +52,12 @@ namespace window {
 
 		bool update() {
 			Tetro t = current_tetro;
+			//TODO:Gravity
 			if (!handle_input()) return false;
 			if (board.collides(current_tetro)) {
 				board.record(t);
 				current_tetro = Tetro::randomTetro();
 			}
-			//Gravity, collision checking
 			return true;
 		}
 	}
