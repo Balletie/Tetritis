@@ -19,25 +19,30 @@ enum tet_type : uint8_t {
 	TETRO_ESS,
 	TETRO_ELL,
 	TETRO_JAY,
+	TETRO_TEE,
 	TETRO_LONG,
 
-	NUM_TETRO
+	TETRO_INVALID,
+	NUM_TETRO = TETRO_INVALID
 };
 
-class Block {
-  public:
-	Block(sf::Color);
+struct Block {
   protected:
 	friend class Tetro;
-
 	sf::Color _c;
 	int8_t _x;
 	int8_t _y;
+  public:
+	Block(sf::Color);
+	const sf::Color getColor() const;
 };
 
 class Tetro : public sf::Drawable {
   public:
 	Tetro(sf::Color, tet_type);
+	const Block* getData();
+	const int8_t getFinalX(const Block*);
+	const int8_t getFinalY(const Block*);
 	void rotateRight();
 	void rotateLeft();
 	void move(direction);
@@ -50,10 +55,11 @@ class Tetro : public sf::Drawable {
 	void initEss();
 	void initEll();
 	void initJay();
+	void initTee();
 	void initLong();
 
 	uint8_t _col;
 	uint8_t _row;
-	std::vector<Block> _blocks;
 	tet_type _t;
+	std::vector<Block> _blocks;
 };

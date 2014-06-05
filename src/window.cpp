@@ -50,15 +50,25 @@ namespace window {
 			return true;
 		}
 
+		bool update() {
+			Tetro t = current_tetro;
+			if (!handle_input()) return false;
+			if (board.collides(current_tetro)) {
+				board.record(t);
+				current_tetro = Tetro::randomTetro();
+			}
+			//Gravity, collision checking
+			return true;
+		}
 	}
 
 	bool loop() {
 		while (running) {
-			running = handle_input();
-	//			if (current_tetro.collides(&board)) current_tetro = Tetro::randomTetro();
+			running = update();
+			//if (board.collides(current_tetro)) current_tetro = Tetro::randomTetro();
 			if (dirty) {
 				window.clear();
-	//			window.draw(board);
+				window.draw(board);
 				window.draw(current_tetro);
 				window.display();
 				dirty = false;
@@ -69,7 +79,8 @@ namespace window {
 	}
 
 	bool open() {
-		window.create(	sf::VideoMode(16*BOARD_WIDTH, 16*BOARD_HEIGHT),
+		window.create(	sf::VideoMode(	CELL_WIDTH_HEIGHT*BOARD_WIDTH,
+						CELL_WIDTH_HEIGHT*BOARD_HEIGHT),
 				"Tetritis",
 				sf::Style::Close | sf::Style::Titlebar);
 		return true;

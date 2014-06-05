@@ -7,9 +7,10 @@ const uint8_t BOARD_HEIGHT = 22;
 class Board : public sf::Drawable {
   public:
 	Board();
-	bool collide(Tetro);
+	bool collides(Tetro&);
+	void record(Tetro&);
   protected:
 	void draw(sf::RenderTarget&, sf::RenderStates) const;	
   private:
-	std::map<uint8_t, tet_type> _data;
+	std::map<uint8_t, sf::Color> _data;
 };

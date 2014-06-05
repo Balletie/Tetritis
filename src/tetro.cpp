@@ -5,7 +5,11 @@
 Block::Block(sf::Color c) : _c(c)
 {}
 
-Tetro::Tetro(sf::Color c, tet_type t) : _col(3), _row(5), _t(t), _blocks(4, Block(c)) {	
+const sf::Color Block::getColor() const {
+	return this->_c;
+}
+
+Tetro::Tetro(sf::Color c, tet_type t) : _col(3), _row(5), _t(t), _blocks(4, Block(c)) {
 	switch(t) {
 		case TETRO_ZEE:
 			initZee();
@@ -22,12 +26,27 @@ Tetro::Tetro(sf::Color c, tet_type t) : _col(3), _row(5), _t(t), _blocks(4, Bloc
 		case TETRO_JAY:
 			initJay();
 			break;
+		case TETRO_TEE:
+			initTee();
+			break;
 		case TETRO_LONG:
 			initLong();
 			break;
 		default:
 			break;
 	}
+}
+
+const Block* Tetro::getData() {
+	return _blocks.data();
+}
+
+const int8_t Tetro::getFinalX(const Block* b) {
+	return (int8_t)this->_col + b->_x;
+}
+
+const int8_t Tetro::getFinalY(const Block* b) {
+	return (int8_t)this->_row + b->_y;
 }
 
 Tetro Tetro::randomTetro() {
@@ -119,6 +138,13 @@ void Tetro::initJay() {
 	_blocks[1]._x = 0,  _blocks[1]._y = 0;
 	_blocks[2]._x = 0,  _blocks[2]._y = -1;
 	_blocks[3]._x = -1,  _blocks[3]._y = -1;
+}
+
+void Tetro::initTee() {
+	_blocks[0]._x = -1, _blocks[0]._y = 0;
+	_blocks[1]._x = 0,  _blocks[1]._y = 0;
+	_blocks[2]._x = 1,  _blocks[2]._y = 0;
+	_blocks[3]._x = 0,  _blocks[3]._y = 1;
 }
 
 void Tetro::initLong() {
