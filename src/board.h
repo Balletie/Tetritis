@@ -12,5 +12,5 @@ class Board : public sf::Drawable {
   protected:
 	void draw(sf::RenderTarget&, sf::RenderStates) const;	
   private:
-	std::map<uint8_t, sf::Color> _data;
+	std::map<uint16_t, sf::Color> _data;
 };

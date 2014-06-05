@@ -46,7 +46,7 @@ const int8_t Tetro::getFinalX(const Block* b) {
 }
 
 const int8_t Tetro::getFinalY(const Block* b) {
-	return (int8_t)this->_row + b->_y;
+	return (int8_t)this->_row - b->_y;
 }
 
 Tetro Tetro::randomTetro() {
