@@ -51,8 +51,9 @@ namespace window {
 		}
 
 		bool update() {
+			// Save old state of block
 			Tetro t = current_tetro;
-			//TODO:Gravity
+			// TODO:Gravity
 			if (!handle_input()) return false;
 			if (board.collides(current_tetro)) {
 				board.record(t);

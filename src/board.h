@@ -12,5 +12,7 @@ class Board : public sf::Drawable {
   protected:
 	void draw(sf::RenderTarget&, sf::RenderStates) const;	
   private:
+	void delete_row(uint8_t);
+	uint8_t _row_sizes[BOARD_HEIGHT];
 	std::map<uint8_t, sf::Color> _data;
 };

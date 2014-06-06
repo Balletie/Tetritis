@@ -29,8 +29,15 @@ void Board::record(Tetro& t) {
 
 		const int8_t fin_x = t.getFinalX(bs + i);
 		if (fin_x < 0 || fin_x > BOARD_WIDTH)	return;
+
+		_row_sizes[fin_y] += 1;
 		_data[(uint8_t)fin_y * BOARD_WIDTH + fin_x] = bs[i].getColor();
+		if (_row_sizes[fin_y] == BOARD_WIDTH) this->delete_row(fin_y);
 	}
+}
+
+void Board::delete_row(uint8_t row) {
+	_data.erase(_data.lower_bound(row * BOARD_WIDTH), _data.upper_bound((row + 1) * BOARD_WIDTH - 1));
 }
 
 void Board::draw(sf::RenderTarget& target, sf::RenderStates states) const {
