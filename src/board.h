@@ -17,10 +17,20 @@ class Board : public sf::Drawable {
 	void draw(sf::RenderTarget&, sf::RenderStates) const;
 
   private:
+	/*
+	 * Deletes the rows that are full between the given range, which is
+	 * (inclusive, exclusive].
+	 */
 	void deleteRowsAsNeeded(uint8_t, uint8_t);
 
 	size_t size() const;
 
+	/*
+	 * The row indices of the vector are inverted with respect to the row
+	 * locations as shown on screen. So row 0 represents the bottom-most row in
+	 * the vector, and row BOARD_HEIGHT - 1 represents the bottom-most row as
+	 * shown on screen. Hence this function.
+	 */
 	uint8_t toRowVectorIndex(const uint8_t row) const {
 		return BOARD_HEIGHT - row - 1;
 	}
