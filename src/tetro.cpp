@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <SFML/Graphics/VertexArray.hpp>
 
+sf::Color tetro_colors[NUM_TETRO] = { sf::Color::Red, sf::Color::Green, sf::Color::Blue, sf::Color::Yellow, sf::Color::Magenta, sf::Color::Cyan, sf::Color::White };
+
 Block::Block(sf::Color c) : _c(c)
 {}
 
@@ -9,7 +11,7 @@ const sf::Color Block::getColor() const {
 	return this->_c;
 }
 
-Tetro::Tetro(sf::Color c, tet_type t) : _col(3), _row(5), _t(t), _blocks(4, Block(c)) {
+Tetro::Tetro(tet_type t) : _col(3), _row(5), _t(t), _blocks(4, Block(tetro_colors[t])) {
 	switch(t) {
 		case TETRO_ZEE:
 			initZee();
@@ -47,7 +49,7 @@ const int8_t Tetro::getFinalY(const Block& b) const {
 
 Tetro Tetro::randomTetro() {
 	tet_type next = (tet_type) (rand() % NUM_TETRO);
-	return Tetro(sf::Color::Red, next);
+	return Tetro(next);
 }
 
 void Tetro::rotateRight() {
@@ -96,7 +98,7 @@ void Tetro::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		quad[1].position = sf::Vector2f(final_x + CELL_WIDTH_HEIGHT, final_y);
 		quad[2].position = sf::Vector2f(final_x + CELL_WIDTH_HEIGHT,final_y + CELL_WIDTH_HEIGHT);
 		quad[3].position = sf::Vector2f(final_x, final_y + CELL_WIDTH_HEIGHT);
-		for (int j = 0; j < 4; j++) quad[j].color = _blocks[i]._c;
+		for (int j = 0; j < 4; j++) quad[j].color = _blocks[i].getColor();
 	}
 	target.draw(vertices, states);
 }

@@ -6,7 +6,7 @@ namespace window {
 		bool dirty   = true;
 		sf::RenderWindow window;
 		Board board;
-		Tetro current_tetro(sf::Color::Red, TETRO_ZEE);
+		Tetro current_tetro = Tetro::randomTetro();
 
 		bool handle_input() {
 			sf::Event event;
@@ -66,7 +66,6 @@ namespace window {
 	bool loop() {
 		while (running) {
 			running = update();
-			//if (board.collides(current_tetro)) current_tetro = Tetro::randomTetro();
 			if (dirty) {
 				window.clear();
 				window.draw(board);

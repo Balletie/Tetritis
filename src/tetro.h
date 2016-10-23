@@ -26,6 +26,8 @@ enum tet_type : uint8_t {
 	NUM_TETRO = TETRO_INVALID
 };
 
+extern sf::Color tetro_colors[NUM_TETRO];
+
 struct Block {
   protected:
 	friend class Tetro;
@@ -42,7 +44,7 @@ struct Block {
 
 class Tetro : public sf::Drawable {
   public:
-	Tetro(sf::Color, tet_type);
+	Tetro(tet_type);
 
 	typedef std::vector<Block> BlockList;
 	typedef BlockList::const_iterator const_iterator;
