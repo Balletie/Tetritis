@@ -14,6 +14,7 @@ class Board : public sf::Drawable {
   public:
 	Board();
 	bool collides(const Tetro&) const;
+	bool isOutOfSideBounds(const Tetro&) const;
 	void record(const Tetro&);
 
 	/*
@@ -53,6 +54,8 @@ class Board : public sf::Drawable {
 	}
 
 	bool isOutOfBounds(const Tetro&, const Block&) const;
+	bool isOutOfSideBounds(const Tetro&, const Block&) const;
+	bool isOutOfBottomBounds(const Tetro&, const Block&) const;
 
 	bool containsRow(const uint8_t row) const {
 		return toRowVectorIndex(row) < _rows.size();

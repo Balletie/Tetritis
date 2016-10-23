@@ -18,6 +18,11 @@ enum direction : uint8_t {
 	DIR_RIGHT
 };
 
+enum rotation : uint8_t {
+	CW,
+	CCW
+};
+
 enum tet_type : uint8_t {
 	TETRO_SQUARE,
 	TETRO_ZEE,

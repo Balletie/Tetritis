@@ -7,7 +7,7 @@ Board::Board()
 
 bool Board::collides(const Tetro& t) const {
 	for (Tetro::const_iterator bs = t.begin(); bs != t.end(); bs++) {
-		if (this->isOutOfBounds(t, *bs)) return true;
+		if (this->isOutOfBottomBounds(t, *bs)) return true;
 
 		if (!this->contains(t.getFinalY(*bs), t.getFinalX(*bs)))
 			continue;
@@ -17,11 +17,18 @@ bool Board::collides(const Tetro& t) const {
 	return false;
 }
 
+bool Board::isOutOfSideBounds(const Tetro& t) const {
+	for (Tetro::const_iterator bs = t.begin(); bs != t.end(); bs++) {
+		if (this->isOutOfSideBounds(t, *bs)) return true;
+	}
+	return false;
+}
+
 void Board::record(const Tetro& t) {
 	uint8_t min_y = BOARD_HEIGHT;
 	uint8_t max_y = 0;
 	for (Tetro::const_iterator bs = t.begin(); bs != t.end(); bs++) {
-		if (this->isOutOfBounds(t, *bs)) continue;
+		if (this->isOutOfBottomBounds(t, *bs)) continue;
 
 		uint8_t fin_x = (uint8_t) t.getFinalX(*bs);
 		uint8_t fin_y = (uint8_t) t.getFinalY(*bs);
@@ -72,11 +79,19 @@ void Board::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 
 /* Private functions */
 bool Board::isOutOfBounds(const Tetro& t, const Block& b) const {
-	const int8_t fin_y = t.getFinalY(b);
-	if (fin_y < 1 || fin_y >= BOARD_HEIGHT)	return true;
+	return isOutOfSideBounds(t, b) || isOutOfBottomBounds(t, b);
+}
 
+bool Board::isOutOfSideBounds(const Tetro& t, const Block& b) const {
 	const int8_t fin_x = t.getFinalX(b);
 	if (fin_x < 0 || fin_x >= BOARD_WIDTH)	return true;
+
+	return false;
+}
+
+bool Board::isOutOfBottomBounds(const Tetro& t, const Block& b) const {
+	const int8_t fin_y = t.getFinalY(b);
+	if (fin_y < 1 || fin_y >= BOARD_HEIGHT)	return true;
 
 	return false;
 }

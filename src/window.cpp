@@ -1,12 +1,21 @@
+#include <map>
 #include "window.h"
+#include "logic.h"
 
 namespace window {
 	namespace {
 		bool running = true;
-		bool dirty   = true;
 		sf::RenderWindow window;
-		Board board;
-		Tetro current_tetro = Tetro::randomTetro();
+		Logic logic;
+
+		typedef std::map<sf::Keyboard::Key, std::shared_ptr<LogicCommand>> CommandMap;
+
+		CommandMap command_for_key = {
+			{ sf::Keyboard::Left, logic._command_factory->createMoveCommand(DIR_LEFT) },
+			{ sf::Keyboard::Right, logic._command_factory->createMoveCommand(DIR_RIGHT) },
+			{ sf::Keyboard::Down, logic._command_factory->createMoveCommand(DIR_DOWN) },
+			{ sf::Keyboard::Space, logic._command_factory->createRotateCommand(CW) }
+		};
 
 		bool handle_input() {
 			sf::Event event;
@@ -20,26 +29,13 @@ namespace window {
 						case sf::Keyboard::Escape:
 							return false;
 						case sf::Keyboard::Return:
-							current_tetro = Tetro::randomTetro();
-							dirty = true;
-							break;
-						case sf::Keyboard::Left:
-							current_tetro.move(DIR_LEFT);
-							dirty = true;
-							break;
-						case sf::Keyboard::Right:
-							current_tetro.move(DIR_RIGHT);
-							dirty = true;
-							break;
-						case sf::Keyboard::Down:
-							current_tetro.move(DIR_DOWN);
-							dirty = true;
-							break;
-						case sf::Keyboard::Space:
-							current_tetro.rotateLeft();
-							dirty = true;
+							logic._current_tetro = Tetro::randomTetro();
 							break;
 						default:
+							auto entry = command_for_key.find(event.key.code);
+							if (entry != command_for_key.end()) {
+								logic.enqueue(entry->second);
+							}
 							break;
 					}
 				}
@@ -49,30 +45,15 @@ namespace window {
 			}
 			return true;
 		}
-
-		bool update() {
-			// Save old state of block
-			Tetro t = current_tetro;
-			// TODO:Gravity
-			if (!handle_input()) return false;
-			if (board.collides(current_tetro)) {
-				board.record(t);
-				current_tetro = Tetro::randomTetro();
-			}
-			return true;
-		}
 	}
 
 	bool loop() {
 		while (running) {
-			running = update();
-			if (dirty) {
-				window.clear();
-				window.draw(board);
-				window.draw(current_tetro);
-				window.display();
-				dirty = false;
-			}
+			running = handle_input();
+			logic.update();
+			window.clear();
+			window.draw(logic);
+			window.display();
 		}
 		window.close();
 		return true;
