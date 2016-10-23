@@ -2,6 +2,7 @@
 #include <SFML/Graphics/Transform.hpp>
 #include "tetro.h"
 
+/* Look-up tables for colors and initialization functions. */
 sf::Color tetro_colors[NUM_TETRO] = {
 	sf::Color::Red, sf::Color::Green, sf::Color::Blue,
 	sf::Color::Yellow, sf::Color::Magenta, sf::Color::Cyan, sf::Color::White
@@ -12,6 +13,7 @@ void (Tetro::* Tetro::tetro_inits[NUM_TETRO])() = {
 	&Tetro::initEll, &Tetro::initJay, &Tetro::initTee, &Tetro::initLong
 };
 
+/* Code for drawing individual blocks. */
 Block::Block(sf::Color c) : _c(c)
 {}
 
@@ -28,6 +30,7 @@ const sf::Color Block::getColor() const {
 	return this->_c;
 }
 
+/* Tetrominos implementation. */
 Tetro::Tetro(tet_type t) : _col(3), _row(5), _t(t), _blocks(4, Block(tetro_colors[t])) {
 	if (t < TETRO_INVALID) {
 		// Call initialization function for the given tet_type `t'.
@@ -95,6 +98,7 @@ void Tetro::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	target.draw(vertices, states);
 }
 
+/* Initialization function used in the function table. */
 void Tetro::initSquare() {
 	_blocks[0]._x = 0, _blocks[0]._y = 0;
 	_blocks[1]._x = 1,  _blocks[1]._y = 0;
