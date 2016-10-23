@@ -13,16 +13,26 @@ class Board : public sf::Drawable {
 	bool collides(const Tetro&) const;
 	void record(const Tetro&);
 
-  protected:
-	void draw(sf::RenderTarget&, sf::RenderStates) const;
-
-  private:
 	/*
 	 * Deletes the rows that are full between the given range, which is
 	 * (inclusive, exclusive].
 	 */
-	void deleteRowsAsNeeded(uint8_t, uint8_t);
+	void deleteFullRows(uint8_t, uint8_t);
 
+	typedef std::vector<Row>::const_iterator const_iterator;
+
+	const_iterator begin() const {
+		return this->_rows.begin();
+	}
+
+	const_iterator end() const {
+		return this->_rows.end();
+	}
+
+  protected:
+	void draw(sf::RenderTarget&, sf::RenderStates) const;
+
+  private:
 	size_t size() const;
 
 	/*
@@ -35,6 +45,10 @@ class Board : public sf::Drawable {
 		return BOARD_HEIGHT - row - 1;
 	}
 
+	bool rowFull(Row r) {
+		return r.size() == BOARD_WIDTH;
+	}
+
 	bool isOutOfBounds(const Tetro&, const Block&) const;
 
 	bool containsRow(const uint8_t row) const {
@@ -44,5 +58,4 @@ class Board : public sf::Drawable {
 	bool contains(const uint8_t, const uint8_t) const;
 
 	std::vector<Row> _rows;
-	typedef std::vector<Row>::const_iterator const_iterator;
 };

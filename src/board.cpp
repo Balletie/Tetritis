@@ -35,16 +35,28 @@ void Board::record(const Tetro& t) {
 
 		_rows[toRowVectorIndex(fin_y)].insert({fin_x, *bs});
 	}
-	this->deleteRowsAsNeeded(min_y, max_y + 1);
+	this->deleteFullRows(min_y, max_y + 1);
+}
+
+void Board::deleteFullRows(uint8_t from, uint8_t to) {
+	uint8_t tempfrom = from;
+	from = toRowVectorIndex(to) + 1;
+	to = toRowVectorIndex(tempfrom) + 1;
+	for (Board::const_iterator it = this->begin() + from; it < this->begin() + to;) {
+		if (rowFull(*it))
+			it = _rows.erase(it);
+		else
+			it++;
+	}
 }
 
 void Board::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	if(_rows.empty()) return;
 
 	sf::VertexArray vertices(sf::Quads, 4*this->size());
-	Board::const_iterator it = _rows.begin();
+	Board::const_iterator it = this->begin();
 
-	for (uint8_t row = 0, i = 0; it != _rows.end(); ++it, row++) {
+	for (uint8_t row = 0, i = 0; it != this->end(); ++it, row++) {
 		for (Row::const_iterator bl_it = it->begin(); bl_it != it->end(); ++bl_it, i++) {
 			sf::Vertex* quad = &vertices[4*i];
 			uint8_t col  = bl_it->first;
@@ -63,10 +75,6 @@ void Board::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 }
 
 /* Private functions */
-bool rowFilled(Row r) {
-	return r.size() == BOARD_WIDTH;
-}
-
 bool Board::isOutOfBounds(const Tetro& t, const Block& b) const {
 	const int8_t fin_y = t.getFinalY(b);
 	if (fin_y < 1 || fin_y >= BOARD_HEIGHT)	return true;
@@ -77,20 +85,8 @@ bool Board::isOutOfBounds(const Tetro& t, const Block& b) const {
 	return false;
 }
 
-void Board::deleteRowsAsNeeded(uint8_t from, uint8_t to) {
-	uint8_t tempfrom = from;
-	from = toRowVectorIndex(to) + 1;
-	to = toRowVectorIndex(tempfrom) + 1;
-	for (auto it = _rows.begin() + from; it < _rows.begin() + to;) {
-		if (rowFilled(*it))
-			it = _rows.erase(it);
-		else
-			it++;
-	}
-}
-
 size_t Board::size() const {
-	return std::accumulate(_rows.begin(), _rows.end(), 0, [](size_t a, Row r) {
+	return std::accumulate(this->begin(), this->end(), 0, [](size_t a, Row r) {
 		return a + r.size();
 	});
 }
