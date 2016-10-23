@@ -1,3 +1,6 @@
+#ifndef TETRO_H
+#define TETRO_H
+
 #include <stdint.h>
 #include <vector>
 #include <SFML/Graphics/Drawable.hpp>
@@ -101,3 +104,5 @@ class Tetro : public sf::Drawable {
 
 	BlockList _blocks;
 };
+
+#endif /* TETRO_H */

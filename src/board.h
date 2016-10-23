@@ -1,3 +1,6 @@
+#ifndef BOARD_H
+#define BOARD_H
+
 #include "tetro.h"
 #include <map>
 
@@ -59,3 +62,5 @@ class Board : public sf::Drawable {
 
 	std::vector<Row> _rows;
 };
+
+#endif /* BOARD_H */
