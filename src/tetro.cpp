@@ -2,7 +2,15 @@
 #include <SFML/Graphics/Transform.hpp>
 #include "tetro.h"
 
-sf::Color tetro_colors[NUM_TETRO] = { sf::Color::Red, sf::Color::Green, sf::Color::Blue, sf::Color::Yellow, sf::Color::Magenta, sf::Color::Cyan, sf::Color::White };
+sf::Color tetro_colors[NUM_TETRO] = {
+	sf::Color::Red, sf::Color::Green, sf::Color::Blue,
+	sf::Color::Yellow, sf::Color::Magenta, sf::Color::Cyan, sf::Color::White
+};
+
+void (Tetro::* Tetro::tetro_inits[NUM_TETRO])() = {
+	&Tetro::initSquare, &Tetro::initZee, &Tetro::initEss,
+	&Tetro::initEll, &Tetro::initJay, &Tetro::initTee, &Tetro::initLong
+};
 
 Block::Block(sf::Color c) : _c(c)
 {}
@@ -21,30 +29,9 @@ const sf::Color Block::getColor() const {
 }
 
 Tetro::Tetro(tet_type t) : _col(3), _row(5), _t(t), _blocks(4, Block(tetro_colors[t])) {
-	switch(t) {
-		case TETRO_ZEE:
-			initZee();
-			break;
-		case TETRO_SQUARE:
-			initSquare();
-			break;
-		case TETRO_ESS:
-			initEss();
-			break;
-		case TETRO_ELL:
-			initEll();
-			break;
-		case TETRO_JAY:
-			initJay();
-			break;
-		case TETRO_TEE:
-			initTee();
-			break;
-		case TETRO_LONG:
-			initLong();
-			break;
-		default:
-			break;
+	if (t < TETRO_INVALID) {
+		// Call initialization function for the given tet_type `t'.
+		(this->*tetro_inits[t])();
 	}
 }
 

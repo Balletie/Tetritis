@@ -83,6 +83,10 @@ class Tetro : public sf::Drawable {
 	void draw(sf::RenderTarget&, sf::RenderStates) const;
 
   private:
+	/*
+	 * Initialization function table.
+	 */
+	static void(Tetro::* tetro_inits[NUM_TETRO])();
 	void initSquare();
 	void initZee();
 	void initEss();
