@@ -4,6 +4,8 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/VertexArray.hpp>
+#include <SFML/Graphics/Vertex.hpp>
 
 const uint8_t CELL_WIDTH_HEIGHT = 16;
 
@@ -28,14 +30,25 @@ enum tet_type : uint8_t {
 
 extern sf::Color tetro_colors[NUM_TETRO];
 
+// Forward declaration (see board.h).
+class Board;
+
 struct Block {
   protected:
 	friend class Tetro;
-	sf::Color _c;
+	friend class Board;
+
+	/*
+	 * Function for drawing to the given vertex array with the given transform,
+	 * which can be in board coordinates or tetrominos coordinates.
+	 */
+	void drawVertices(sf::Vertex*, sf::Transform&) const;
 
 	// The x and y coordinates are relative to the center of a tetrominos.
 	int8_t _x;
 	int8_t _y;
+
+	sf::Color _c;
 
   public:
 	Block(sf::Color);

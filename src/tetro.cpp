@@ -1,11 +1,20 @@
-#include "tetro.h"
 #include <stdlib.h>
-#include <SFML/Graphics/VertexArray.hpp>
+#include <SFML/Graphics/Transform.hpp>
+#include "tetro.h"
 
 sf::Color tetro_colors[NUM_TETRO] = { sf::Color::Red, sf::Color::Green, sf::Color::Blue, sf::Color::Yellow, sf::Color::Magenta, sf::Color::Cyan, sf::Color::White };
 
 Block::Block(sf::Color c) : _c(c)
 {}
+
+void Block::drawVertices(sf::Vertex *quad, sf::Transform& transform) const {
+	sf::Vector2f final_x_y = transform.transformPoint((float)_x, -(float)_y);
+	quad[0].position = final_x_y;
+	quad[1].position = final_x_y + sf::Vector2f(CELL_WIDTH_HEIGHT, 0);
+	quad[2].position = final_x_y + sf::Vector2f(CELL_WIDTH_HEIGHT, CELL_WIDTH_HEIGHT);
+	quad[3].position = final_x_y + sf::Vector2f(0, CELL_WIDTH_HEIGHT);
+	for (int j = 0; j < 4; j++) quad[j].color = this->getColor();
+}
 
 const sf::Color Block::getColor() const {
 	return this->_c;
@@ -90,15 +99,11 @@ void Tetro::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	sf::VertexArray vertices(sf::Quads, 4*4);
 	for (int i = 0; i < 4; i++) {
 		sf::Vertex* quad = &vertices[4*i];
-		const uint8_t final_col = this->_col + _blocks[i]._x;
-		const uint8_t final_row = this->_row - _blocks[i]._y;
-		const float final_x = CELL_WIDTH_HEIGHT * final_col;
-		const float final_y = CELL_WIDTH_HEIGHT * final_row;
-		quad[0].position = sf::Vector2f(final_x, final_y);
-		quad[1].position = sf::Vector2f(final_x + CELL_WIDTH_HEIGHT, final_y);
-		quad[2].position = sf::Vector2f(final_x + CELL_WIDTH_HEIGHT,final_y + CELL_WIDTH_HEIGHT);
-		quad[3].position = sf::Vector2f(final_x, final_y + CELL_WIDTH_HEIGHT);
-		for (int j = 0; j < 4; j++) quad[j].color = _blocks[i].getColor();
+		sf::Transform t = states.transform;
+		const float final_x = CELL_WIDTH_HEIGHT * this->_col;
+		const float final_y = CELL_WIDTH_HEIGHT * this->_row;
+		_blocks[i].drawVertices(quad, t.translate(final_x, final_y)
+			.scale(CELL_WIDTH_HEIGHT, CELL_WIDTH_HEIGHT));
 	}
 	target.draw(vertices, states);
 }

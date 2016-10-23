@@ -59,16 +59,12 @@ void Board::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	for (uint8_t row = 0, i = 0; it != this->end(); ++it, row++) {
 		for (Row::const_iterator bl_it = it->begin(); bl_it != it->end(); ++bl_it, i++) {
 			sf::Vertex* quad = &vertices[4*i];
+			sf::Transform t = states.transform;
 			uint8_t col  = bl_it->first;
-			sf::Color cl = bl_it->second.getColor();
+			Block bl = bl_it->second;
 			uint16_t x = CELL_WIDTH_HEIGHT * col;
 			uint16_t y = CELL_WIDTH_HEIGHT * (BOARD_HEIGHT - row - 1);
-
-			quad[0].position = sf::Vector2f(x, y);
-			quad[1].position = sf::Vector2f(x + CELL_WIDTH_HEIGHT, y);
-			quad[2].position = sf::Vector2f(x + CELL_WIDTH_HEIGHT, y + CELL_WIDTH_HEIGHT);
-			quad[3].position = sf::Vector2f(x, y + CELL_WIDTH_HEIGHT);
-			for (int j = 0; j < 4; j++) quad[j].color = cl;
+			bl.drawVertices(quad, t.translate(x,y).scale(0, 0));
 		}
 	}
 	target.draw(vertices);
