@@ -30,8 +30,11 @@ struct Block {
   protected:
 	friend class Tetro;
 	sf::Color _c;
+
+	// The x and y coordinates are relative to the center of a tetrominos.
 	int8_t _x;
 	int8_t _y;
+
   public:
 	Block(sf::Color);
 	const sf::Color getColor() const;
@@ -40,15 +43,30 @@ struct Block {
 class Tetro : public sf::Drawable {
   public:
 	Tetro(sf::Color, tet_type);
-	const Block* getData();
-	const int8_t getFinalX(const Block*);
-	const int8_t getFinalY(const Block*);
+
+	typedef std::vector<Block> BlockList;
+	typedef BlockList::const_iterator const_iterator;
+
+	const const_iterator begin() const {
+		return this->_blocks.begin();
+	};
+
+	const const_iterator end() const {
+		return this->_blocks.end();
+	};
+
+	const int8_t getFinalX(const Block&) const;
+	const int8_t getFinalY(const Block&) const;
+
 	void rotateRight();
 	void rotateLeft();
 	void move(direction);
+
 	static Tetro randomTetro();
+
   protected:
 	void draw(sf::RenderTarget&, sf::RenderStates) const;
+
   private:
 	void initSquare();
 	void initZee();
@@ -61,5 +79,6 @@ class Tetro : public sf::Drawable {
 	uint8_t _col;
 	uint8_t _row;
 	tet_type _t;
-	std::vector<Block> _blocks;
+
+	BlockList _blocks;
 };

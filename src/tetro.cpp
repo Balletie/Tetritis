@@ -37,16 +37,12 @@ Tetro::Tetro(sf::Color c, tet_type t) : _col(3), _row(5), _t(t), _blocks(4, Bloc
 	}
 }
 
-const Block* Tetro::getData() {
-	return _blocks.data();
+const int8_t Tetro::getFinalX(const Block& b) const {
+	return (int8_t)this->_col + b._x;
 }
 
-const int8_t Tetro::getFinalX(const Block* b) {
-	return (int8_t)this->_col + b->_x;
-}
-
-const int8_t Tetro::getFinalY(const Block* b) {
-	return (int8_t)this->_row - b->_y;
+const int8_t Tetro::getFinalY(const Block& b) const {
+	return (int8_t)this->_row - b._y;
 }
 
 Tetro Tetro::randomTetro() {

@@ -1,63 +1,103 @@
+#include <numeric>
 #include <SFML/Graphics/VertexArray.hpp>
 #include "board.h"
 
-Board::Board() 
+Board::Board()
 {}
 
-bool Board::collides(Tetro& t) {
-	const Block* bs = t.getData();
-	for (int i = 0; i < 4; i++) {
-		const int8_t fin_y = t.getFinalY(bs + i);
-		if (fin_y < 1 || fin_y >= BOARD_HEIGHT)	return true;
+bool Board::collides(const Tetro& t) const {
+	for (Tetro::const_iterator bs = t.begin(); bs != t.end(); bs++) {
+		if (this->isOutOfBounds(t, *bs)) return true;
 
-		const int8_t fin_x = t.getFinalX(bs + i);
-		if (fin_x < 0 || fin_x >= BOARD_WIDTH)	return true;
-
-		// coordinates are within board bounds, so we can construct a key.
-		uint8_t key = fin_y * BOARD_WIDTH + fin_x;
-		if (_data.find(key) == _data.end()) 	continue;
-		else					return true;
+		if (!this->contains(t.getFinalY(*bs), t.getFinalX(*bs)))
+			continue;
+		else
+			return true;
 	}
 	return false;
 }
 
-void Board::record(Tetro& t) {
-	const Block* bs = t.getData();
-	for (int i = 0; i < 4; i++) {
-		const int8_t fin_y = t.getFinalY(bs + i);
-		if (fin_y < 1 || fin_y > BOARD_HEIGHT)	return;
+void Board::record(const Tetro& t) {
+	uint8_t min_y = BOARD_HEIGHT;
+	uint8_t max_y = 0;
+	for (Tetro::const_iterator bs = t.begin(); bs != t.end(); bs++) {
+		if (this->isOutOfBounds(t, *bs)) continue;
 
-		const int8_t fin_x = t.getFinalX(bs + i);
-		if (fin_x < 0 || fin_x > BOARD_WIDTH)	return;
+		uint8_t fin_x = (uint8_t) t.getFinalX(*bs);
+		uint8_t fin_y = (uint8_t) t.getFinalY(*bs);
+		min_y = std::min(min_y, fin_y);
+		max_y = std::max(max_y, fin_y);
 
-		_row_sizes[fin_y] += 1;
-		_data[(uint8_t)fin_y * BOARD_WIDTH + fin_x] = bs[i].getColor();
-		if (_row_sizes[fin_y] == BOARD_WIDTH) this->delete_row(fin_y);
+		// Grow as needed
+		if (!this->containsRow(fin_y)) {
+			_rows.resize(toRowVectorIndex(fin_y) + 1);
+		}
+
+		_rows[toRowVectorIndex(fin_y)].insert({fin_x, *bs});
 	}
-}
-
-void Board::delete_row(uint8_t row) {
-	_data.erase(_data.lower_bound(row * BOARD_WIDTH), _data.upper_bound((row + 1) * BOARD_WIDTH - 1));
+	this->deleteRowsAsNeeded(min_y, max_y + 1);
 }
 
 void Board::draw(sf::RenderTarget& target, sf::RenderStates states) const {
-	if(_data.empty()) return;
+	if(_rows.empty()) return;
 
-	sf::VertexArray vertices(sf::Quads, 4*_data.size());
-	typename std::map<uint8_t, sf::Color>::const_iterator it = _data.begin();
+	sf::VertexArray vertices(sf::Quads, 4*this->size());
+	Board::const_iterator it = _rows.begin();
 
-	for (int i = 0; it != _data.end(); ++it, i++) {
-		sf::Vertex* quad = &vertices[4*i];
-		uint8_t key  = it->first;
-		sf::Color cl = it->second;
-		uint16_t x = CELL_WIDTH_HEIGHT * (key % BOARD_WIDTH);
-		uint16_t y = CELL_WIDTH_HEIGHT * (key / BOARD_WIDTH);
+	for (uint8_t row = 0, i = 0; it != _rows.end(); ++it, row++) {
+		for (Row::const_iterator bl_it = it->begin(); bl_it != it->end(); ++bl_it, i++) {
+			sf::Vertex* quad = &vertices[4*i];
+			uint8_t col  = bl_it->first;
+			sf::Color cl = bl_it->second.getColor();
+			uint16_t x = CELL_WIDTH_HEIGHT * col;
+			uint16_t y = CELL_WIDTH_HEIGHT * (BOARD_HEIGHT - row - 1);
 
-		quad[0].position = sf::Vector2f(x, y);
-		quad[1].position = sf::Vector2f(x + CELL_WIDTH_HEIGHT, y);
-		quad[2].position = sf::Vector2f(x + CELL_WIDTH_HEIGHT, y + CELL_WIDTH_HEIGHT);
-		quad[3].position = sf::Vector2f(x, y + CELL_WIDTH_HEIGHT);
-		for (int j = 0; j < 4; j++) quad[j].color = cl;
+			quad[0].position = sf::Vector2f(x, y);
+			quad[1].position = sf::Vector2f(x + CELL_WIDTH_HEIGHT, y);
+			quad[2].position = sf::Vector2f(x + CELL_WIDTH_HEIGHT, y + CELL_WIDTH_HEIGHT);
+			quad[3].position = sf::Vector2f(x, y + CELL_WIDTH_HEIGHT);
+			for (int j = 0; j < 4; j++) quad[j].color = cl;
+		}
 	}
 	target.draw(vertices);
+}
+
+/* Private functions */
+bool rowFilled(Row r) {
+	return r.size() == BOARD_WIDTH;
+}
+
+bool Board::isOutOfBounds(const Tetro& t, const Block& b) const {
+	const int8_t fin_y = t.getFinalY(b);
+	if (fin_y < 1 || fin_y >= BOARD_HEIGHT)	return true;
+
+	const int8_t fin_x = t.getFinalX(b);
+	if (fin_x < 0 || fin_x >= BOARD_WIDTH)	return true;
+
+	return false;
+}
+
+void Board::deleteRowsAsNeeded(uint8_t from, uint8_t to) {
+	uint8_t tempfrom = from;
+	from = toRowVectorIndex(to) + 1;
+	to = toRowVectorIndex(tempfrom) + 1;
+	for (auto it = _rows.begin() + from; it < _rows.begin() + to;) {
+		if (rowFilled(*it))
+			it = _rows.erase(it);
+		else
+			it++;
+	}
+}
+
+size_t Board::size() const {
+	return std::accumulate(_rows.begin(), _rows.end(), 0, [](size_t a, Row r) {
+		return a + r.size();
+	});
+}
+
+bool Board::contains(const uint8_t row, const uint8_t column) const {
+	if (!containsRow(row))	return false;
+
+	Row r = _rows[toRowVectorIndex(row)];
+	return r.find(column) != r.end();
 }
