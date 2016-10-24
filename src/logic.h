@@ -60,7 +60,7 @@ class BasicMoveCommand : public LogicCommand {
 	BasicMoveCommand(Logic& l, direction dir, OnMoved r, OnWallHit wh)
 		: LogicCommand(l), _dir(dir)
 		, _onMovedCallback(r), _onWallHitCallback(wh) {}
-	void perform();
+	void perform() override;
 
   private:
 	direction _dir;
@@ -74,7 +74,7 @@ class BasicRotateCommand : public LogicCommand {
 		: LogicCommand(l), _rot(rot)
 		, _onRotatedCallback(r), _onWallHitCallback(wh) {}
 
-	void perform();
+	void perform() override;
 
   private:
 	rotation _rot;
@@ -85,7 +85,7 @@ class BasicRotateCommand : public LogicCommand {
 class BasicDropCommand : public LogicCommand {
   public:
 	BasicDropCommand(Logic& l, OnMoved m) : LogicCommand(l), _onMovedCallback(m) {}
-	void perform();
+	void perform() override;
 
   private:
 	OnMoved _onMovedCallback;

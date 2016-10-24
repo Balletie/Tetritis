@@ -41,7 +41,7 @@ void Board::record(const Tetro& t) {
 			_rows.resize(toRowVectorIndex(fin_y) + 1);
 		}
 
-		_rows[toRowVectorIndex(fin_y)].insert({fin_x, *bs});
+		_rows[toRowVectorIndex(fin_y)].emplace(fin_x, BoardBlock(t.getColor()));
 	}
 	this->deleteFullRows(min_y, max_y + 1);
 }
@@ -68,28 +68,28 @@ void Board::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		for (Row::const_iterator bl_it = it->begin(); bl_it != it->end(); ++bl_it, i++) {
 			sf::Vertex* quad = &vertices[4*i];
 			uint8_t col  = bl_it->first;
-			Block bl = bl_it->second;
+			BoardBlock bl = bl_it->second;
 			uint16_t x = CELL_WIDTH_HEIGHT * col;
 			uint16_t y = CELL_WIDTH_HEIGHT * (BOARD_HEIGHT - row - 1);
-			bl.drawVertices(quad, translation_mat(x,y).scale(0, 0));
+			bl.drawVertices(quad, x, y);
 		}
 	}
 	target.draw(vertices, states);
 }
 
 /* Private functions */
-bool Board::isOutOfBounds(const Tetro& t, const Block& b) const {
+bool Board::isOutOfBounds(const Tetro& t, const TetroBlock& b) const {
 	return isOutOfSideBounds(t, b) || isOutOfBottomBounds(t, b);
 }
 
-bool Board::isOutOfSideBounds(const Tetro& t, const Block& b) const {
+bool Board::isOutOfSideBounds(const Tetro& t, const TetroBlock& b) const {
 	const int8_t fin_x = t.getFinalX(b);
 	if (fin_x < 0 || fin_x >= BOARD_WIDTH)	return true;
 
 	return false;
 }
 
-bool Board::isOutOfBottomBounds(const Tetro& t, const Block& b) const {
+bool Board::isOutOfBottomBounds(const Tetro& t, const TetroBlock& b) const {
 	const int8_t fin_y = t.getFinalY(b);
 	if (fin_y < 1 || fin_y >= BOARD_HEIGHT)	return true;
 

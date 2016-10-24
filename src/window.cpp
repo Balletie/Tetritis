@@ -36,7 +36,7 @@ namespace window {
 						case sf::Keyboard::Escape:
 							return false;
 						case sf::Keyboard::Return:
-							logic._current_tetro = Tetro::randomTetro();
+							logic._current_tetro = TetroFactory::createRandomTetro();
 							break;
 						default:
 							auto entry = command_for_key.find(event.key.code);

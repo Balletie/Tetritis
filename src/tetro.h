@@ -1,7 +1,6 @@
 #ifndef TETRO_H
 #define TETRO_H
 
-#include <stdint.h>
 #include <vector>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -10,7 +9,7 @@
 #include <SFML/Graphics/VertexArray.hpp>
 #include <SFML/Graphics/Vertex.hpp>
 
-const uint8_t CELL_WIDTH_HEIGHT = 16;
+#include "block.h"
 
 enum direction : int8_t {
 	DIR_RIGHT = -1,
@@ -24,52 +23,13 @@ enum rotation : int8_t {
 	CCW = 1
 };
 
-enum tet_type : uint8_t {
-	TETRO_SQUARE,
-	TETRO_ZEE,
-	TETRO_ESS,
-	TETRO_ELL,
-	TETRO_JAY,
-	TETRO_TEE,
-	TETRO_LONG,
-
-	TETRO_INVALID,
-	NUM_TETRO = TETRO_INVALID
-};
-
-extern sf::Color tetro_colors[NUM_TETRO];
-
-// Forward declaration (see board.h).
-class Board;
-
-struct Block {
-  protected:
-	friend class Tetro;
-	friend class Board;
-
-	/*
-	 * Function for drawing to the given vertex array with the given transform,
-	 * which can be in board coordinates or tetrominos coordinates.
-	 */
-	void drawVertices(sf::Vertex*, sf::Transform&) const;
-
-	// The x and y coordinates are relative to the center of a tetrominos.
-	int8_t _x;
-	int8_t _y;
-
-	sf::Color _c;
-
-  public:
-	Block(sf::Color);
-	const sf::Color getColor() const;
-};
+class TetroFactory;
 
 class Tetro : public sf::Drawable {
-  public:
-	Tetro(tet_type);
-
-	typedef std::vector<Block> BlockList;
+	public:
+	typedef std::vector<TetroBlock> BlockList;
 	typedef BlockList::const_iterator const_iterator;
+	friend class TetroFactory;
 
 	const const_iterator begin() const {
 		return this->_blocks.begin();
@@ -81,35 +41,88 @@ class Tetro : public sf::Drawable {
 
 	const uint8_t getColumn() const;
 	const uint8_t getRow() const;
-	const int8_t getFinalX(const Block&) const;
-	const int8_t getFinalY(const Block&) const;
+	const int8_t getFinalX(const TetroBlock&) const;
+	const int8_t getFinalY(const TetroBlock&) const;
+	sf::Color getColor() const;
 
 	void rotate(rotation);
 	void move(direction);
 
-	static Tetro randomTetro();
-
   protected:
-	void draw(sf::RenderTarget&, sf::RenderStates) const;
+	Tetro(sf::Color, BlockList);
+	void draw(sf::RenderTarget&, sf::RenderStates) const override;
 
   private:
-	/*
-	 * Initialization function table.
-	 */
-	static void(Tetro::* tetro_inits[NUM_TETRO])();
-	void initSquare();
-	void initZee();
-	void initEss();
-	void initEll();
-	void initJay();
-	void initTee();
-	void initLong();
-
 	uint8_t _col;
 	uint8_t _row;
-	tet_type _t;
-
+	sf::Color _c;
 	BlockList _blocks;
+};
+
+class TetroFactory {
+  public:
+	typedef Tetro (* TetroCreator)();
+
+	static Tetro createRandomTetro() {
+		static TetroCreator creators[] = {
+			&createI, &createJ, &createL, &createO, &createS, &createT, &createZ
+		};
+		const unsigned int numTetro = sizeof(creators)/sizeof(*creators);
+		return creators[rand() % numTetro]();
+	}
+
+	static Tetro createI() {
+		return Tetro(sf::Color::White, {
+			{0,  1},
+			{0,  0},
+			{0, -1},
+			{0, -2}
+		});
+	}
+
+	static Tetro createJ() {
+		return Tetro(sf::Color::Magenta, {
+			{0,  1},
+			{0,  0},
+			{0, -1}, {-1, -1}
+		});
+	}
+
+	static Tetro createL() {
+		return Tetro(sf::Color::Yellow, {
+			{0,  1},
+			{0,  0},
+			{0, -1}, {1, -1}
+		});
+	}
+
+	static Tetro createO() {
+		return Tetro(sf::Color::Red, {
+			{0, 0}, {1, 0},
+			{0, 1}, {1, 1}
+		});
+	}
+
+	static Tetro createS() {
+		return Tetro(sf::Color::Blue, {
+			{1,  0}, { 0,  0},
+			{0, -1}, {-1, -1}
+		});
+	}
+
+	static Tetro createT() {
+		return Tetro(sf::Color::Cyan, {
+			{-1, 0}, {0, 0}, {1, 0},
+			{ 0, 1}
+		});
+	}
+
+	static Tetro createZ() {
+		return Tetro(sf::Color::Green, {
+			{-1,  0}, {0,  0},
+			{ 0, -1}, {1, -1}
+		});
+	}
 };
 
 #endif /* TETRO_H */

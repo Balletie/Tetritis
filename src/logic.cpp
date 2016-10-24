@@ -1,7 +1,7 @@
 #include "logic.h"
 
 Logic::Logic()
-	: _current_tetro(Tetro::randomTetro())
+	: _current_tetro(TetroFactory::createRandomTetro())
 	, _command_factory(new BasicLogicCommandFactory(*this)) {}
 
 void Logic::update() {
@@ -10,7 +10,7 @@ void Logic::update() {
 
 	if (_board.collides(_current_tetro)) {
 		_board.record(t);
-		_current_tetro = Tetro::randomTetro();
+		_current_tetro = TetroFactory::createRandomTetro();
 	}
 }
 

@@ -1,14 +1,14 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#include "tetro.h"
 #include <map>
+#include "tetro.h"
 
 const uint8_t BOARD_WIDTH = 10;
 const uint8_t BOARD_HEIGHT = 22;
 
 // Rows are sorted maps from column index to block.
-typedef std::map<uint8_t, Block> Row;
+typedef std::map<uint8_t, BoardBlock> Row;
 
 class Board : public sf::Drawable {
   public:
@@ -53,9 +53,9 @@ class Board : public sf::Drawable {
 		return r.size() == BOARD_WIDTH;
 	}
 
-	bool isOutOfBounds(const Tetro&, const Block&) const;
-	bool isOutOfSideBounds(const Tetro&, const Block&) const;
-	bool isOutOfBottomBounds(const Tetro&, const Block&) const;
+	bool isOutOfBounds(const Tetro&, const TetroBlock&) const;
+	bool isOutOfSideBounds(const Tetro&, const TetroBlock&) const;
+	bool isOutOfBottomBounds(const Tetro&, const TetroBlock&) const;
 
 	bool containsRow(const uint8_t row) const {
 		return toRowVectorIndex(row) < _rows.size();
