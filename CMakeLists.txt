@@ -11,3 +11,4 @@ if(SFML_FOUND)
 endif()
 
 add_subdirectory(src)
+add_subdirectory(tweeny)

@@ -79,6 +79,8 @@ class Tetro : public sf::Drawable {
 		return this->_blocks.end();
 	};
 
+	const uint8_t getColumn() const;
+	const uint8_t getRow() const;
 	const int8_t getFinalX(const Block&) const;
 	const int8_t getFinalY(const Block&) const;
 

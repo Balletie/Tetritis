@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <SFML/Graphics/Transform.hpp>
+#include "matrices.h"
 #include "tetro.h"
 
 /* Look-up tables for colors and initialization functions. */
@@ -36,6 +36,14 @@ Tetro::Tetro(tet_type t) : _col(3), _row(5), _t(t), _blocks(4, Block(tetro_color
 		// Call initialization function for the given tet_type `t'.
 		(this->*tetro_inits[t])();
 	}
+}
+
+const uint8_t Tetro::getColumn() const {
+	return this->_col;
+}
+
+const uint8_t Tetro::getRow() const {
+	return this->_row;
 }
 
 const int8_t Tetro::getFinalX(const Block& b) const {
@@ -80,12 +88,12 @@ void Tetro::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	sf::VertexArray vertices(sf::Quads, 4*4);
 	for (int i = 0; i < 4; i++) {
 		sf::Vertex* quad = &vertices[4*i];
-		sf::Transform t = states.transform;
-		const float final_x = CELL_WIDTH_HEIGHT * this->_col;
-		const float final_y = CELL_WIDTH_HEIGHT * this->_row;
-		_blocks[i].drawVertices(quad, t.translate(final_x, final_y)
-			.scale(CELL_WIDTH_HEIGHT, CELL_WIDTH_HEIGHT));
+		sf::Transform t = scale_mat(CELL_WIDTH_HEIGHT);
+		_blocks[i].drawVertices(quad, t);
 	}
+	const float final_x = CELL_WIDTH_HEIGHT * this->_col;
+	const float final_y = CELL_WIDTH_HEIGHT * this->_row;
+	states.transform.translate(final_x, final_y);
 	target.draw(vertices, states);
 }
 

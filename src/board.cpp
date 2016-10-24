@@ -1,5 +1,6 @@
 #include <numeric>
 #include <SFML/Graphics/VertexArray.hpp>
+#include "matrices.h"
 #include "board.h"
 
 Board::Board()
@@ -66,15 +67,14 @@ void Board::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	for (uint8_t row = 0, i = 0; it != this->end(); ++it, row++) {
 		for (Row::const_iterator bl_it = it->begin(); bl_it != it->end(); ++bl_it, i++) {
 			sf::Vertex* quad = &vertices[4*i];
-			sf::Transform t = states.transform;
 			uint8_t col  = bl_it->first;
 			Block bl = bl_it->second;
 			uint16_t x = CELL_WIDTH_HEIGHT * col;
 			uint16_t y = CELL_WIDTH_HEIGHT * (BOARD_HEIGHT - row - 1);
-			bl.drawVertices(quad, t.translate(x,y).scale(0, 0));
+			bl.drawVertices(quad, translation_mat(x,y).scale(0, 0));
 		}
 	}
-	target.draw(vertices);
+	target.draw(vertices, states);
 }
 
 /* Private functions */

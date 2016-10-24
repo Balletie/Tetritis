@@ -1,4 +1,5 @@
 #include <map>
+#include <thread>
 #include "window.h"
 #include "logic.h"
 #include "drawing.h"
@@ -60,6 +61,7 @@ namespace window {
 			window.clear();
 			drawing.update();
 			window.display();
+			std::this_thread::sleep_for(std::chrono::milliseconds(16));
 		}
 		window.close();
 		return true;
