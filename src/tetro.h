@@ -12,15 +12,16 @@
 
 const uint8_t CELL_WIDTH_HEIGHT = 16;
 
-enum direction : uint8_t {
+enum direction : int8_t {
+	DIR_RIGHT = -1,
 	DIR_DOWN,
 	DIR_LEFT,
-	DIR_RIGHT
+	NUM_DIRS = 3
 };
 
-enum rotation : uint8_t {
-	CW,
-	CCW
+enum rotation : int8_t {
+	CW = -1,
+	CCW = 1
 };
 
 enum tet_type : uint8_t {
@@ -81,8 +82,7 @@ class Tetro : public sf::Drawable {
 	const int8_t getFinalX(const Block&) const;
 	const int8_t getFinalY(const Block&) const;
 
-	void rotateRight();
-	void rotateLeft();
+	void rotate(rotation);
 	void move(direction);
 
 	static Tetro randomTetro();

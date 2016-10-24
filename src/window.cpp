@@ -1,20 +1,26 @@
 #include <map>
 #include "window.h"
 #include "logic.h"
+#include "drawing.h"
 
 namespace window {
 	namespace {
 		bool running = true;
 		sf::RenderWindow window;
 		Logic logic;
+		AnimatedDrawing drawing(logic, window);
 
 		typedef std::map<sf::Keyboard::Key, std::shared_ptr<LogicCommand>> CommandMap;
 
 		CommandMap command_for_key = {
-			{ sf::Keyboard::Left, logic._command_factory->createMoveCommand(DIR_LEFT) },
-			{ sf::Keyboard::Right, logic._command_factory->createMoveCommand(DIR_RIGHT) },
-			{ sf::Keyboard::Down, logic._command_factory->createMoveCommand(DIR_DOWN) },
-			{ sf::Keyboard::Space, logic._command_factory->createRotateCommand(CW) }
+			{ sf::Keyboard::Left, logic._command_factory->createMoveCommand(DIR_LEFT,
+				drawing.onMoved_cb(), drawing.onWallHit_cb()) },
+			{ sf::Keyboard::Right, logic._command_factory->createMoveCommand(DIR_RIGHT,
+				drawing.onMoved_cb(), drawing.onWallHit_cb()) },
+			{ sf::Keyboard::Down, logic._command_factory->createMoveCommand(DIR_DOWN,
+				drawing.onMoved_cb(), drawing.onWallHit_cb()) },
+			{ sf::Keyboard::Space, logic._command_factory->createRotateCommand(CCW,
+				drawing.onRotated_cb(), drawing.onWallHit_cb()) },
 		};
 
 		bool handle_input() {
@@ -52,7 +58,7 @@ namespace window {
 			running = handle_input();
 			logic.update();
 			window.clear();
-			window.draw(logic);
+			drawing.update();
 			window.display();
 		}
 		window.close();

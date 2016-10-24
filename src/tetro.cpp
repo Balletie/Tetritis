@@ -51,21 +51,12 @@ Tetro Tetro::randomTetro() {
 	return Tetro(next);
 }
 
-void Tetro::rotateRight() {
+void Tetro::rotate(rotation rot) {
 	if (this->_t == TETRO_SQUARE) return;
 	for (int i = 0; i < 4; i++) {
 		int8_t temp = _blocks[i]._x;
-		_blocks[i]._x = _blocks[i]._y;
-		_blocks[i]._y = -1 * temp;
-	}
-}
-
-void Tetro::rotateLeft() {
-	if (this->_t == TETRO_SQUARE) return;
-	for (int i = 0; i < 4; i++) {
-		int8_t temp = _blocks[i]._x;
-		_blocks[i]._x = -1 * _blocks[i]._y;
-		_blocks[i]._y = temp;
+		_blocks[i]._x = -1 * rot * _blocks[i]._y;
+		_blocks[i]._y = rot * temp;
 	}
 }
 

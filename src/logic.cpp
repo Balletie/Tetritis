@@ -22,24 +22,26 @@ void Logic::emptyCommandQueue() {
 	}
 }
 
-void Logic::draw(sf::RenderTarget& target, sf::RenderStates states) const {
-	target.draw(_board);
-	target.draw(_current_tetro);
-}
-
-#define ENSURE_noWallHit(ID, CODE) \
-	Tetro ID = _logic._current_tetro; \
-	CODE; \
-	if (!_logic._board.isOutOfSideBounds(ID)) { \
-		_logic._current_tetro = ID; \
-	}
-
 void BasicMoveCommand::perform() {
-	ENSURE_noWallHit(t, t.move(_dir));
+	Tetro t = _logic._current_tetro;
+	t.move(_dir);
+	if (!_logic._board.isOutOfSideBounds(t)) {
+		_logic._current_tetro = t;
+		_onMovedCallback(_dir);
+	} else {
+		_onWallHitCallback(t);
+	}
 }
 
 void BasicRotateCommand::perform() {
-	ENSURE_noWallHit(t, t.rotateLeft());
+	Tetro t = _logic._current_tetro;
+	t.rotate(_rot);
+	if (!_logic._board.isOutOfSideBounds(t)) {
+		_logic._current_tetro = t;
+		_onRotatedCallback(_rot);
+	} else {
+		_onWallHitCallback(t);
+	}
 }
 
 void BasicDropCommand::perform() {
