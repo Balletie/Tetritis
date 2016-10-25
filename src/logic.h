@@ -44,7 +44,7 @@ class Logic {
 	}
 
 	void update();
-	void recordOnCollision(Tetro& t);
+	void recordOnCollision(Tetro&);
 	void record();
 
 	Board _board;

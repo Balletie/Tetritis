@@ -18,8 +18,7 @@ void Logic::record() {
 }
 
 void Logic::recordOnCollision(Tetro& t) {
-	if (_board.collides(_current_tetro)) {
-		_current_tetro = t;
+	if (_board.collides(t)) {
 		record();
 	} else {
 		_current_tetro = t;
