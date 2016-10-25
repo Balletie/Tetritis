@@ -1,8 +1,8 @@
 #ifndef MACROS_H
 #define MACROS_H
 
-#define CNT_ARGS(...) CNT_ARGS_(__VA_ARGS__,8,7,6,5,4,3,2,1)
-#define CNT_ARGS_(_1,_2,_3,_4,_5,_6,_7,_8,n,...) n
+#define CNT_ARGS(...) CNT_ARGS_(, ## __VA_ARGS__,8,7,6,5,4,3,2,1,0)
+#define CNT_ARGS_(_0,_1,_2,_3,_4,_5,_6,_7,_8,n,...) n
 
 #define REVERSE(...) REVERSE_(CNT_ARGS(__VA_ARGS__),__VA_ARGS__)
 #define REVERSE_(n,...) REVERSE__(n,__VA_ARGS__)
@@ -21,6 +21,7 @@
 #define INTERSPERSE_SPACE__(n,...) INTERSPERSE_SPACE_##n(__VA_ARGS__)
 
 /* Reverse the variadic arguments list. */
+#define REVERSE_0()
 #define REVERSE_1(x,...) x
 #define REVERSE_2(x,...) REVERSE_1(__VA_ARGS__), x
 #define REVERSE_3(x,...) REVERSE_2(__VA_ARGS__), x
@@ -32,6 +33,7 @@
 
 /* Drop the types in a sequence of type and argument name pairs:
  * DROP_TYPES(Foo, f, Bar, b) -> f, b */
+#define DROP_TYPES_0()
 #define DROP_TYPES_2(ptype,pname,...) pname
 #define DROP_TYPES_4(ptype,pname,...) pname, DROP_TYPES_2(__VA_ARGS__)
 #define DROP_TYPES_6(ptype,pname,...) pname, DROP_TYPES_4(__VA_ARGS__)
@@ -39,6 +41,7 @@
 
 /* Generate type-and-name pairs in a function declaration parameter list:
  * GEN_TYPE_NAME_PAIRS(Foo, Bar) -> Foo, arg0, Bar, arg1 */
+#define GEN_TYPE_NAME_PAIRS_0()
 #define GEN_TYPE_NAME_PAIRS_1(ptype,...) ptype, arg0
 #define GEN_TYPE_NAME_PAIRS_2(ptype,...) GEN_TYPE_NAME_PAIRS_1(__VA_ARGS__), ptype, arg1
 #define GEN_TYPE_NAME_PAIRS_3(ptype,...) GEN_TYPE_NAME_PAIRS_2(__VA_ARGS__), ptype, arg2
@@ -46,6 +49,7 @@
 
 /* Intersperse spaces between each pair:
  * INTERSPERSE_SPACE(Foo, f, Bar, b) -> Foo f, Bar b */
+#define INTERSPERSE_SPACE_0()
 #define INTERSPERSE_SPACE_2(ptype, pname,...) ptype pname
 #define INTERSPERSE_SPACE_4(ptype, pname,...) ptype pname, INTERSPERSE_SPACE_2(__VA_ARGS__)
 #define INTERSPERSE_SPACE_6(ptype, pname,...) ptype pname, INTERSPERSE_SPACE_4(__VA_ARGS__)
@@ -67,6 +71,10 @@
 	}
 
 // Test-case, uncomment to try out.
+//CNT_ARGS()
+//CNT_ARGS(1)
+//CNT_ARGS(1,2)
 //REGISTER_CALLBACK(onMoved, Logic&, Tetro)
+//REGISTER_CALLBACK(onDropped)
 
 #endif /* MACROS_H */
