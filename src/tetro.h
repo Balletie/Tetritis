@@ -86,8 +86,8 @@ class TetroFactory {
 
 	static Tetro createL() {
 		return Tetro(sf::Color::Yellow, {
-			{-1, 0}, {0,  0}, {1, 0},
-			{-1, 1}
+			{-1,  0}, {0,  0}, {1, 0},
+			{-1, -1}
 		});
 	}
 
