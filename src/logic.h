@@ -10,6 +10,7 @@ class Logic;
 typedef std::function<void(direction)> OnMoved;
 typedef std::function<void(rotation)> OnRotated;
 typedef std::function<void(Tetro)> OnWallHit;
+typedef std::function<void(uint8_t)> OnDropped;
 
 class LogicCommand {
   public:
@@ -28,7 +29,7 @@ class LogicCommandFactory {
 		const direction, OnMoved, OnWallHit) const = 0;
 	virtual std::shared_ptr<LogicCommand> createRotateCommand(
 		const rotation, OnRotated, OnWallHit) const = 0;
-	virtual std::shared_ptr<LogicCommand> createDropCommand(OnMoved) const = 0;
+	virtual std::shared_ptr<LogicCommand> createDropCommand(OnDropped) const = 0;
 
   protected:
 	Logic& _logic;
@@ -43,13 +44,12 @@ class Logic {
 	}
 
 	void update();
+	void recordOnCollision(Tetro& t);
+	void record();
 
 	Board _board;
 	Tetro _current_tetro;
 	std::unique_ptr<LogicCommandFactory> _command_factory;
-
-	private:
-	void emptyCommandQueue();
 
   protected:
 	std::queue<std::shared_ptr<LogicCommand>> _command_queue;
@@ -84,11 +84,11 @@ class BasicRotateCommand : public LogicCommand {
 
 class BasicDropCommand : public LogicCommand {
   public:
-	BasicDropCommand(Logic& l, OnMoved m) : LogicCommand(l), _onMovedCallback(m) {}
+	BasicDropCommand(Logic& l, OnDropped d) : LogicCommand(l), _onDroppedCallback(d) {}
 	void perform() override;
 
   private:
-	OnMoved _onMovedCallback;
+	OnDropped _onDroppedCallback;
 };
 
 class BasicLogicCommandFactory : public LogicCommandFactory {
@@ -104,8 +104,8 @@ class BasicLogicCommandFactory : public LogicCommandFactory {
 		return std::shared_ptr<LogicCommand>(new BasicRotateCommand(_logic, rot, r, wh));
 	}
 
-	virtual std::shared_ptr<LogicCommand> createDropCommand(OnMoved m) const {
-		return std::shared_ptr<LogicCommand>(new BasicDropCommand(_logic, m));
+	virtual std::shared_ptr<LogicCommand> createDropCommand(OnDropped d) const {
+		return std::shared_ptr<LogicCommand>(new BasicDropCommand(_logic, d));
 	}
 };
 

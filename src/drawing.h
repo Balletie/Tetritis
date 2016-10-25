@@ -14,11 +14,13 @@ class AnimatedDrawing : public sf::Drawable {
 	REGISTER_CALLBACK(onMoved, direction)
 	REGISTER_CALLBACK(onRotated, rotation)
 	REGISTER_CALLBACK(onWallHit, Tetro)
+	REGISTER_CALLBACK(onDropped, uint8_t)
 
 	void update();
 
   private:
 	uint32_t restartClock();
+	void onMoved(direction, uint8_t);
 
 	std::chrono::steady_clock::time_point _start;
 

@@ -20,8 +20,11 @@ namespace window {
 				drawing.onMoved_cb(), drawing.onWallHit_cb()) },
 			{ sf::Keyboard::Down, logic._command_factory->createMoveCommand(DIR_DOWN,
 				drawing.onMoved_cb(), drawing.onWallHit_cb()) },
-			{ sf::Keyboard::Space, logic._command_factory->createRotateCommand(CCW,
+			{ sf::Keyboard::Up, logic._command_factory->createDropCommand(drawing.onDropped_cb()) },
+			{ sf::Keyboard::Z, logic._command_factory->createRotateCommand(CCW,
 				drawing.onRotated_cb(), drawing.onWallHit_cb()) },
+			{ sf::Keyboard::X, logic._command_factory->createRotateCommand(CW,
+				drawing.onRotated_cb(), drawing.onWallHit_cb()) }
 		};
 
 		bool handle_input() {

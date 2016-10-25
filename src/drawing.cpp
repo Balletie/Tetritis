@@ -26,14 +26,18 @@ uint32_t AnimatedDrawing::restartClock() {
 	return dt.count();
 }
 
-void AnimatedDrawing::onMoved(direction dir) {
+void AnimatedDrawing::onMoved(direction dir, uint8_t height) {
 	_tween =
 		tweeny::from(
 			(float) (dir * CELL_WIDTH_HEIGHT / 2),
-			(float) ((dir - 1) % 2 * CELL_WIDTH_HEIGHT / 2))
+			(float) (height * (dir - 1) % 2 * CELL_WIDTH_HEIGHT / 2))
 		.to(0.f,0.f)
 		.during(50)
 		.onStep([this](float x, float y) { _transform = translation_mat(x, y); return false; });
+}
+
+void AnimatedDrawing::onMoved(direction dir) {
+	this->onMoved(dir, 1);
 }
 
 void AnimatedDrawing::onRotated(rotation rot) {
@@ -50,4 +54,8 @@ void AnimatedDrawing::onRotated(rotation rot) {
 }
 
 void AnimatedDrawing::onWallHit(Tetro t) {
+}
+
+void AnimatedDrawing::onDropped(uint8_t height) {
+	this->onMoved(DIR_DOWN, height);
 }
