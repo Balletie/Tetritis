@@ -73,26 +73,21 @@ class TetroFactory {
 
 	static Tetro createI() {
 		return Tetro(sf::Color::White, {
-			{0,  1},
-			{0,  0},
-			{0, -1},
-			{0, -2}
+			{-1, 0}, { 0, 0}, { 1, 0}, { 2, 0}
 		});
 	}
 
 	static Tetro createJ() {
 		return Tetro(sf::Color::Magenta, {
-			{0,  1},
-			{0,  0},
-			{0, -1}, {-1, -1}
+			{-1,  1},
+			{-1,  0}, {0, 0}, {1, 0}
 		});
 	}
 
 	static Tetro createL() {
 		return Tetro(sf::Color::Yellow, {
-			{0,  1},
-			{0,  0},
-			{0, -1}, {1, -1}
+			{-1, 0}, {0,  0}, {1, 0},
+			{-1, 1}
 		});
 	}
 
@@ -105,22 +100,22 @@ class TetroFactory {
 
 	static Tetro createS() {
 		return Tetro(sf::Color::Blue, {
-			{1,  0}, { 0,  0},
-			{0, -1}, {-1, -1}
+			         {0, 1}, {1,  1},
+			{-1, 0}, {0, 0}
 		});
 	}
 
 	static Tetro createT() {
 		return Tetro(sf::Color::Cyan, {
-			{-1, 0}, {0, 0}, {1, 0},
-			{ 0, 1}
+			         {0, 1},
+			{-1, 0}, {0, 0}, {1, 0}
 		});
 	}
 
 	static Tetro createZ() {
 		return Tetro(sf::Color::Green, {
-			{-1,  0}, {0,  0},
-			{ 0, -1}, {1, -1}
+			{-1, 1}, {0, 1},
+			         {0, 0}, {1, 0}
 		});
 	}
 };
