@@ -3,8 +3,11 @@
 #include "tetro.h"
 #include "block.h"
 
-Tetro::Tetro(sf::Color c, BlockList blocks) : _col(3), _row(5), _c(c),
+Tetro::Tetro(sf::Color c, float c_x, float c_y, BlockList blocks)
+	: _col(3), _row(5), _center_x(c_x), _center_y(c_y), _c(c),
 	_blocks(blocks) {}
+
+Tetro::Tetro(sf::Color c, BlockList blocks) : Tetro (c, 0.f, 0.f, blocks) {}
 
 const uint8_t Tetro::getColumn() const {
 	return this->_col;
@@ -12,6 +15,14 @@ const uint8_t Tetro::getColumn() const {
 
 const uint8_t Tetro::getRow() const {
 	return this->_row;
+}
+
+const float Tetro::getCenterX() const {
+	return this->_center_x;
+}
+
+const float Tetro::getCenterY() const {
+	return this->_center_y;
 }
 
 const int8_t Tetro::getFinalX(const TetroBlock& b) const {
@@ -29,8 +40,8 @@ sf::Color Tetro::getColor() const {
 void Tetro::rotate(rotation rot) {
 	for (int i = 0; i < 4; i++) {
 		int8_t temp = _blocks[i]._x;
-		_blocks[i]._x = -1 * rot * _blocks[i]._y;
-		_blocks[i]._y = rot * temp;
+		_blocks[i]._x = -1 * rot * _blocks[i]._y + _center_x + _center_y * rot;
+		_blocks[i]._y = rot * temp + _center_y - _center_x * rot;
 	}
 }
 

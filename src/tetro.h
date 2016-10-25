@@ -41,6 +41,8 @@ class Tetro : public sf::Drawable {
 
 	const uint8_t getColumn() const;
 	const uint8_t getRow() const;
+	const float getCenterX() const;
+	const float getCenterY() const;
 	const int8_t getFinalX(const TetroBlock&) const;
 	const int8_t getFinalY(const TetroBlock&) const;
 	sf::Color getColor() const;
@@ -49,12 +51,15 @@ class Tetro : public sf::Drawable {
 	void move(direction);
 
   protected:
+	Tetro(sf::Color, float, float, BlockList);
 	Tetro(sf::Color, BlockList);
 	void draw(sf::RenderTarget&, sf::RenderStates) const override;
 
   private:
 	uint8_t _col;
 	uint8_t _row;
+	float _center_x;
+	float _center_y;
 	sf::Color _c;
 	BlockList _blocks;
 };
@@ -72,7 +77,7 @@ class TetroFactory {
 	}
 
 	static Tetro createI() {
-		return Tetro(sf::Color::White, {
+		return Tetro(sf::Color::White, 0.5, -0.5, {
 			{-1, 0}, { 0, 0}, { 1, 0}, { 2, 0}
 		});
 	}
@@ -92,7 +97,7 @@ class TetroFactory {
 	}
 
 	static Tetro createO() {
-		return Tetro(sf::Color::Red, {
+		return Tetro(sf::Color::Red, 0.5, 0.5, {
 			{0, 0}, {1, 0},
 			{0, 1}, {1, 1}
 		});

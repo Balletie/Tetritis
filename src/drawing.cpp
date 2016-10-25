@@ -41,8 +41,8 @@ void AnimatedDrawing::onMoved(direction dir) {
 }
 
 void AnimatedDrawing::onRotated(rotation rot) {
-	float centerX = _current_tetro.getColumn() * CELL_WIDTH_HEIGHT + CELL_WIDTH_HEIGHT / 2;
-	float centerY = _current_tetro.getRow() * CELL_WIDTH_HEIGHT + CELL_WIDTH_HEIGHT / 2;
+	float centerX = ((float)_current_tetro.getColumn() + _current_tetro.getCenterX()) * CELL_WIDTH_HEIGHT + CELL_WIDTH_HEIGHT / 2;
+	float centerY = ((float)_current_tetro.getRow() - _current_tetro.getCenterY()) * CELL_WIDTH_HEIGHT + CELL_WIDTH_HEIGHT / 2;
 	_tween =
 		tweeny::from((float) rot * 90.f, 0.f)
 		.to(0.f, 0.f)
