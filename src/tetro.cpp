@@ -9,6 +9,14 @@ Tetro::Tetro(sf::Color c, float c_x, float c_y, BlockList blocks)
 
 Tetro::Tetro(sf::Color c, BlockList blocks) : Tetro (c, 0.f, 0.f, blocks) {}
 
+const sf::Color Tetro::Cyan(49, 199, 239);
+const sf::Color Tetro::Yellow(247,211,8);
+const sf::Color Tetro::Purple(173,77,156);
+const sf::Color Tetro::Green(66,182,66);
+const sf::Color Tetro::Red(239,32,41);
+const sf::Color Tetro::Blue(90,101,173);
+const sf::Color Tetro::Orange(239,121,33);
+
 const uint8_t Tetro::getColumn() const {
 	return this->_col;
 }

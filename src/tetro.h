@@ -50,6 +50,14 @@ class Tetro : public sf::Drawable {
 	void rotate(rotation);
 	void move(direction);
 
+	static const sf::Color Cyan;
+	static const sf::Color Yellow;
+	static const sf::Color Purple;
+	static const sf::Color Green;
+	static const sf::Color Red;
+	static const sf::Color Blue;
+	static const sf::Color Orange;
+
   protected:
 	Tetro(sf::Color, float, float, BlockList);
 	Tetro(sf::Color, BlockList);
@@ -77,48 +85,48 @@ class TetroFactory {
 	}
 
 	static Tetro createI() {
-		return Tetro(sf::Color::White, 0.5, -0.5, {
+		return Tetro(Tetro::Cyan, 0.5, -0.5, {
 			{-1, 0}, { 0, 0}, { 1, 0}, { 2, 0}
 		});
 	}
 
 	static Tetro createJ() {
-		return Tetro(sf::Color::Magenta, {
+		return Tetro(Tetro::Blue, {
 			{-1,  1},
 			{-1,  0}, {0, 0}, {1, 0}
 		});
 	}
 
 	static Tetro createL() {
-		return Tetro(sf::Color::Yellow, {
+		return Tetro(Tetro::Orange, {
 			{-1,  0}, {0,  0}, {1, 0},
 			{-1, -1}
 		});
 	}
 
 	static Tetro createO() {
-		return Tetro(sf::Color::Red, 0.5, 0.5, {
+		return Tetro(Tetro::Yellow, 0.5, 0.5, {
 			{0, 0}, {1, 0},
 			{0, 1}, {1, 1}
 		});
 	}
 
 	static Tetro createS() {
-		return Tetro(sf::Color::Blue, {
+		return Tetro(Tetro::Green, {
 			         {0, 1}, {1,  1},
 			{-1, 0}, {0, 0}
 		});
 	}
 
 	static Tetro createT() {
-		return Tetro(sf::Color::Cyan, {
+		return Tetro(Tetro::Purple, {
 			         {0, 1},
 			{-1, 0}, {0, 0}, {1, 0}
 		});
 	}
 
 	static Tetro createZ() {
-		return Tetro(sf::Color::Green, {
+		return Tetro(Tetro::Red, {
 			{-1, 1}, {0, 1},
 			         {0, 0}, {1, 0}
 		});
