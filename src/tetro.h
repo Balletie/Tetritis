@@ -10,25 +10,19 @@
 #include <SFML/Graphics/Vertex.hpp>
 
 #include "block.h"
-
-enum direction : int8_t {
-	DIR_RIGHT = -1,
-	DIR_DOWN,
-	DIR_LEFT,
-	NUM_DIRS = 3
-};
-
-enum rotation : int8_t {
-	CW = -1,
-	CCW = 1
-};
+#include "movements.h"
 
 class TetroFactory;
 
 class Tetro : public sf::Drawable {
 	public:
+
 	typedef std::vector<TetroBlock> BlockList;
 	typedef BlockList::const_iterator const_iterator;
+	typedef std::pair<int8_t, int8_t> WallKickOffset;
+	typedef std::pair<int8_t, int8_t> WallKickTranslation;
+	typedef std::vector<WallKickOffset> WallKickOffsetRow;
+
 	friend class TetroFactory;
 
 	const const_iterator begin() const {
@@ -41,13 +35,12 @@ class Tetro : public sf::Drawable {
 
 	const uint8_t getColumn() const;
 	const uint8_t getRow() const;
-	const float getCenterX() const;
-	const float getCenterY() const;
 	const int8_t getFinalX(const TetroBlock&) const;
 	const int8_t getFinalY(const TetroBlock&) const;
 	sf::Color getColor() const;
+	WallKickOffset getWallKickOffset(uint8_t);
 
-	void rotate(rotation);
+	WallKickTranslation rotate(rotation, uint8_t = 0);
 	void move(direction);
 
 	static const sf::Color Cyan;
@@ -58,16 +51,23 @@ class Tetro : public sf::Drawable {
 	static const sf::Color Blue;
 	static const sf::Color Orange;
 
+	static const WallKickOffsetRow jlstz_offsets[4];
+	static const WallKickOffsetRow i_offsets[4];
+	static const WallKickOffsetRow o_offsets[4];
+
   protected:
-	Tetro(sf::Color, float, float, BlockList);
-	Tetro(sf::Color, BlockList);
+	Tetro(sf::Color, BlockList, const WallKickOffsetRow (*)[4] = &jlstz_offsets);
 	void draw(sf::RenderTarget&, sf::RenderStates) const override;
 
   private:
+	void translate(uint8_t, uint8_t);
+	WallKickTranslation getWallKickTranslation(rotation, uint8_t);
+
 	uint8_t _col;
 	uint8_t _row;
-	float _center_x;
-	float _center_y;
+	orientation _orntn;
+	const WallKickOffsetRow (*_wall_kick_offsets)[4];
+
 	sf::Color _c;
 	BlockList _blocks;
 };
@@ -85,9 +85,9 @@ class TetroFactory {
 	}
 
 	static Tetro createI() {
-		return Tetro(Tetro::Cyan, 0.5, -0.5, {
+		return Tetro(Tetro::Cyan, {
 			{-1, 0}, { 0, 0}, { 1, 0}, { 2, 0}
-		});
+		}, &Tetro::i_offsets);
 	}
 
 	static Tetro createJ() {
@@ -99,16 +99,16 @@ class TetroFactory {
 
 	static Tetro createL() {
 		return Tetro(Tetro::Orange, {
-			{-1,  0}, {0,  0}, {1, 0},
-			{-1, -1}
+			                   {1, 1},
+			{-1,  0}, {0,  0}, {1, 0}
 		});
 	}
 
 	static Tetro createO() {
-		return Tetro(Tetro::Yellow, 0.5, 0.5, {
-			{0, 0}, {1, 0},
-			{0, 1}, {1, 1}
-		});
+		return Tetro(Tetro::Yellow, {
+			{0, 1}, {1, 1},
+			{0, 0}, {1, 0}
+		}, &Tetro::o_offsets);
 	}
 
 	static Tetro createS() {

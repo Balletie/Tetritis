@@ -8,7 +8,8 @@
 class Logic;
 
 typedef std::function<void(direction)> OnMoved;
-typedef std::function<void(rotation)> OnRotated;
+typedef std::function<void(rotation, Tetro::WallKickTranslation,
+	Tetro::WallKickOffset)> OnRotated;
 typedef std::function<void(Tetro)> OnWallHit;
 typedef std::function<void(uint8_t)> OnDropped;
 

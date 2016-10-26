@@ -37,14 +37,18 @@ void BasicMoveCommand::perform() {
 }
 
 void BasicRotateCommand::perform() {
-	Tetro t = _logic._current_tetro;
-	t.rotate(_rot);
-	if (!_logic._board.isOutOfSideBounds(t)) {
-		_logic.recordOnCollision(t);
-		_onRotatedCallback(_rot);
-	} else {
-		_onWallHitCallback(t);
+	for (int i = 0; i < 5; i++) {
+		Tetro t = _logic._current_tetro;
+		Tetro::WallKickTranslation trans = t.rotate(_rot, i);
+
+		if (!_logic._board.isOutOfSideBounds(t) && !_logic._board.collides(t)) {
+			Tetro::WallKickOffset off = t.getWallKickOffset(i);
+			_logic._current_tetro = t;
+			_onRotatedCallback(_rot, trans, off);
+			return;
+		}
 	}
+	_onWallHitCallback(_logic._current_tetro);
 }
 
 void BasicDropCommand::perform() {

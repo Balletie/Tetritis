@@ -3,11 +3,9 @@
 #include "tetro.h"
 #include "block.h"
 
-Tetro::Tetro(sf::Color c, float c_x, float c_y, BlockList blocks)
-	: _col(3), _row(5), _center_x(c_x), _center_y(c_y), _c(c),
-	_blocks(blocks) {}
-
-Tetro::Tetro(sf::Color c, BlockList blocks) : Tetro (c, 0.f, 0.f, blocks) {}
+Tetro::Tetro(sf::Color c, BlockList blocks, const Tetro::WallKickOffsetRow (*wk_offsets)[4])
+	: _col(3), _row(5), _orntn(ZERO), _wall_kick_offsets(wk_offsets), _c(c)
+	, _blocks(blocks) {}
 
 const sf::Color Tetro::Cyan(49, 199, 239);
 const sf::Color Tetro::Yellow(247,211,8);
@@ -17,20 +15,39 @@ const sf::Color Tetro::Red(239,32,41);
 const sf::Color Tetro::Blue(90,101,173);
 const sf::Color Tetro::Orange(239,121,33);
 
+/* These tables have been retrieved from
+ * https://tetris.wiki/SRS#How_Guideline_SRS_Really_Works. The tables for the I
+ * and O block also take into account the "wobble" when rotating (see first
+ * columns). This therefore removes the need for a vector member variable which
+ * translates the block origin (e.g. bottom left corner for O) to the true
+ * origin (the middle of the O block, which does not mark an actual block but
+ * is inbetween blocks).
+ */
+const Tetro::WallKickOffsetRow Tetro::jlstz_offsets[4] {
+	{{ 0, 0}, { 0, 0}, { 0, 0}, { 0, 0}, { 0, 0}},
+	{{ 0, 0}, {+1, 0}, {+1,-1}, { 0,+2}, {+1,+2}},
+	{{ 0, 0}, { 0, 0}, { 0, 0}, { 0, 0}, { 0, 0}},
+	{{ 0, 0}, {-1, 0}, {-1,-1}, { 0,+2}, {-1,+2}}
+};
+const Tetro::WallKickOffsetRow Tetro::i_offsets[4] {
+	{{ 0, 0}, {-1, 0}, {+2, 0}, {-1, 0}, {+2, 0}},
+	{{-1, 0}, { 0, 0}, { 0, 0}, { 0,+1}, { 0,-2}},
+	{{-1,+1}, {+1,+1}, {-2,+1}, {+1, 0}, {-2, 0}},
+	{{ 0,+1}, { 0,+1}, { 0,+1}, { 0,-1}, { 0,+2}}
+};
+const Tetro::WallKickOffsetRow Tetro::o_offsets[4] {
+	{{ 0, 0}},
+	{{ 0,-1}},
+	{{-1,-1}},
+	{{-1, 0}}
+};
+
 const uint8_t Tetro::getColumn() const {
 	return this->_col;
 }
 
 const uint8_t Tetro::getRow() const {
 	return this->_row;
-}
-
-const float Tetro::getCenterX() const {
-	return this->_center_x;
-}
-
-const float Tetro::getCenterY() const {
-	return this->_center_y;
 }
 
 const int8_t Tetro::getFinalX(const TetroBlock& b) const {
@@ -45,12 +62,35 @@ sf::Color Tetro::getColor() const {
 	return this->_c;
 }
 
-void Tetro::rotate(rotation rot) {
+void Tetro::translate(uint8_t x, uint8_t y) {
+	this->_col += x;
+	this->_row -= y;
+}
+
+Tetro::WallKickOffset Tetro::getWallKickOffset(uint8_t idx) {
+	return (*_wall_kick_offsets)[_orntn][idx];
+}
+
+Tetro::WallKickOffset Tetro::getWallKickTranslation(rotation rot, uint8_t idx) {
+	Tetro::WallKickOffset current_offset = getWallKickOffset(idx);
+	Tetro::WallKickOffset next_offset = (*_wall_kick_offsets)[_orntn + rot][idx];
+
+	return std::make_pair(
+		current_offset.first - next_offset.first,
+		current_offset.second - next_offset.second
+	);
+}
+
+Tetro::WallKickTranslation Tetro::rotate(rotation rot, uint8_t kick_test_num) {
 	for (int i = 0; i < 4; i++) {
 		int8_t temp = _blocks[i]._x;
-		_blocks[i]._x = -1 * rot * _blocks[i]._y + _center_x + _center_y * rot;
-		_blocks[i]._y = rot * temp + _center_y - _center_x * rot;
+		_blocks[i]._x = rot * _blocks[i]._y;
+		_blocks[i]._y = -1 * rot * temp;
 	}
+	Tetro::WallKickTranslation xy = getWallKickTranslation(rot, kick_test_num);
+	_orntn += rot;
+	translate(xy.first, xy.second);
+	return xy;
 }
 
 void Tetro::move(direction d) {

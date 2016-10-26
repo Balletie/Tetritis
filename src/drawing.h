@@ -12,7 +12,8 @@ class AnimatedDrawing : public sf::Drawable {
 	AnimatedDrawing(Logic&, sf::RenderTarget&);
 
 	REGISTER_CALLBACK(onMoved, direction)
-	REGISTER_CALLBACK(onRotated, rotation)
+	REGISTER_CALLBACK(onRotated, rotation, Tetro::WallKickTranslation,
+		Tetro::WallKickOffset)
 	REGISTER_CALLBACK(onWallHit, Tetro)
 	REGISTER_CALLBACK(onDropped, uint8_t)
 

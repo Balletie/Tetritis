@@ -40,15 +40,17 @@ void AnimatedDrawing::onMoved(direction dir) {
 	this->onMoved(dir, 1);
 }
 
-void AnimatedDrawing::onRotated(rotation rot) {
-	float centerX = ((float)_current_tetro.getColumn() + _current_tetro.getCenterX()) * CELL_WIDTH_HEIGHT + CELL_WIDTH_HEIGHT / 2;
-	float centerY = ((float)_current_tetro.getRow() - _current_tetro.getCenterY()) * CELL_WIDTH_HEIGHT + CELL_WIDTH_HEIGHT / 2;
+void AnimatedDrawing::onRotated(rotation rot, Tetro::WallKickTranslation trans, Tetro::WallKickOffset off) {
+	float trans_x = (rot * trans.second - trans.first)  * 0.5;
+	float trans_y = (rot * trans.first  + trans.second) * 0.5;
+	float centerX = ((float)_current_tetro.getColumn() + trans_x) * CELL_WIDTH_HEIGHT + CELL_WIDTH_HEIGHT / 2;
+	float centerY = ((float)_current_tetro.getRow() + trans_y) * CELL_WIDTH_HEIGHT + CELL_WIDTH_HEIGHT / 2;
 	_tween =
-		tweeny::from((float) rot * 90.f, 0.f)
+		tweeny::from((float) -1 * rot * 90.f, 0.f)
 		.to(0.f, 0.f)
 		.during(50)
-		.onStep([this,centerX,centerY](float t, float) {
-			_transform = rotation_mat(t, centerX, centerY);
+		.onStep([this,centerX,centerY,off](float t, float) {
+			_transform = translation_mat(-off.first, -off.second).rotate(t, centerX, centerY);
 			return false;
 		});
 }
