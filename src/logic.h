@@ -15,9 +15,10 @@ typedef std::function<void(uint8_t)> OnDropped;
 
 class LogicCommand {
   public:
-	LogicCommand(Logic& l) : _logic(l) {};
+	LogicCommand(Logic& l) : _logic(l) {}
 	virtual void perform() = 0;
 
+	virtual ~LogicCommand() {}
   protected:
 	Logic& _logic;
 };
@@ -31,6 +32,8 @@ class LogicCommandFactory {
 	virtual std::shared_ptr<LogicCommand> createRotateCommand(
 		const rotation, OnRotated, OnWallHit) const = 0;
 	virtual std::shared_ptr<LogicCommand> createDropCommand(OnDropped) const = 0;
+
+	virtual ~LogicCommandFactory() {}
 
   protected:
 	Logic& _logic;
