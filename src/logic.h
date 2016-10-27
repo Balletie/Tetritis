@@ -3,15 +3,28 @@
 
 #include <queue>
 #include <memory>
+#include <functional>
+#include <typeindex>
+#include <unordered_map>
 #include "board.h"
 
 class Logic;
 
-typedef std::function<void(direction)> OnMoved;
-typedef std::function<void(rotation, Tetro::WallKickTranslation,
-	Tetro::WallKickOffset)> OnRotated;
-typedef std::function<void(Tetro)> OnWallHit;
-typedef std::function<void(uint8_t)> OnDropped;
+enum class LogicEvent {
+	Move,
+	Rotation,
+	WallHit,
+	Drop
+};
+
+// Hash specialization for LogicEvent enum.
+namespace std {
+	template<> struct hash<LogicEvent> {
+		size_t operator()(const LogicEvent e) const {
+			return static_cast<typename std::underlying_type<LogicEvent>::type>(e);
+		}
+	};
+} // namespace std
 
 class LogicCommand {
   public:
@@ -27,11 +40,9 @@ class LogicCommandFactory {
   public:
 	LogicCommandFactory(Logic& l) : _logic(l) {}
 
-	virtual std::shared_ptr<LogicCommand> createMoveCommand(
-		const direction, OnMoved, OnWallHit) const = 0;
-	virtual std::shared_ptr<LogicCommand> createRotateCommand(
-		const rotation, OnRotated, OnWallHit) const = 0;
-	virtual std::shared_ptr<LogicCommand> createDropCommand(OnDropped) const = 0;
+	virtual std::shared_ptr<LogicCommand> createMoveCommand(const direction) const = 0;
+	virtual std::shared_ptr<LogicCommand> createRotateCommand(const rotation) const = 0;
+	virtual std::shared_ptr<LogicCommand> createDropCommand() const = 0;
 
 	virtual ~LogicCommandFactory() {}
 
@@ -40,6 +51,25 @@ class LogicCommandFactory {
 };
 
 class Logic {
+  private:
+	/* Wrapper with no template arguments, so that any function type can be
+	 * stored in the same container. */
+	struct AbstractLogicEventCallback {
+		virtual ~AbstractLogicEventCallback() {}
+	};
+
+	/* Concrete wrapper which has template arguments. */
+	template <typename Func>
+	struct LogicEventCallback : AbstractLogicEventCallback {
+		public:
+		std::function<Func> _function;
+		LogicEventCallback(std::function<Func> f) : _function(f) {}
+	};
+
+	/* The callbacks are stored grouped by their function signature. */
+	typedef std::unordered_multimap<std::type_index, std::unique_ptr<AbstractLogicEventCallback>>
+		LogicEventCallbacks;
+
   public:
 	Logic();
 
@@ -51,65 +81,84 @@ class Logic {
 	void recordOnCollision(Tetro&);
 	void record();
 
+	template <typename Func>
+	void addCallback(LogicEvent id, std::function<Func> func) {
+		const std::type_index listeners_index(typeid(Func));
+		std::unique_ptr<AbstractLogicEventCallback> func_ptr(new LogicEventCallback<Func>(func));
+		LogicEventCallbacks& callbacks = _eventCallbacks[id];
+		callbacks.insert(LogicEventCallbacks::value_type(listeners_index, std::move(func_ptr)));
+	}
+
+	template <typename... Args>
+	void callBack(LogicEvent id, Args&&... args) const {
+		typedef void Func(typename std::remove_reference<Args>::type...);
+
+		std::type_index listeners_index(typeid(Func));
+		auto cbs = _eventCallbacks.find(id);
+		if (cbs == _eventCallbacks.end())
+			return; // No callbacks found for this type of event.
+
+		auto range = cbs->second.equal_range(listeners_index);
+		for (auto it = range.first; it != range.second; it++) {
+			AbstractLogicEventCallback& callback = *it->second;
+			// This cast is safe because we only store one type of AbstractLogicEventCallback.
+			const std::function<Func>& func =
+				static_cast<const LogicEventCallback<Func> &>(callback)._function;
+			func(std::forward<Args>(args)...);
+		}
+	}
+
 	Board _board;
 	Tetro _current_tetro;
 	std::unique_ptr<LogicCommandFactory> _command_factory;
 
   protected:
 	std::queue<std::shared_ptr<LogicCommand>> _command_queue;
+
+  private:
+	std::unordered_map<LogicEvent, LogicEventCallbacks> _eventCallbacks;
 };
 
 class BasicMoveCommand : public LogicCommand {
   public:
-	BasicMoveCommand(Logic& l, direction dir, OnMoved r, OnWallHit wh)
-		: LogicCommand(l), _dir(dir)
-		, _onMovedCallback(r), _onWallHitCallback(wh) {}
+	BasicMoveCommand(Logic& l, direction dir)
+		: LogicCommand(l), _dir(dir) {}
 	void perform() override;
 
   private:
 	direction _dir;
-	OnMoved _onMovedCallback;
-	OnWallHit _onWallHitCallback;
 };
 
 class BasicRotateCommand : public LogicCommand {
   public:
-	BasicRotateCommand(Logic& l, rotation rot, OnRotated r, OnWallHit wh)
-		: LogicCommand(l), _rot(rot)
-		, _onRotatedCallback(r), _onWallHitCallback(wh) {}
+	BasicRotateCommand(Logic& l, rotation rot)
+		: LogicCommand(l), _rot(rot) {}
 
 	void perform() override;
 
   private:
 	rotation _rot;
-	OnRotated _onRotatedCallback;
-	OnWallHit _onWallHitCallback;
 };
 
 class BasicDropCommand : public LogicCommand {
   public:
-	BasicDropCommand(Logic& l, OnDropped d) : LogicCommand(l), _onDroppedCallback(d) {}
+	BasicDropCommand(Logic& l) : LogicCommand(l) {}
 	void perform() override;
-
-  private:
-	OnDropped _onDroppedCallback;
 };
 
 class BasicLogicCommandFactory : public LogicCommandFactory {
   public:
 	BasicLogicCommandFactory(Logic& l) : LogicCommandFactory(l) {}
-	virtual std::shared_ptr<LogicCommand> createMoveCommand(const direction dir,
-			OnMoved m, OnWallHit wh) const {
-		return std::shared_ptr<LogicCommand>(new BasicMoveCommand(_logic, dir, m, wh));
+	virtual std::shared_ptr<LogicCommand> createMoveCommand(const direction dir) const {
+		return std::shared_ptr<LogicCommand>(new BasicMoveCommand(_logic, dir));
 	}
 
-	virtual std::shared_ptr<LogicCommand> createRotateCommand(const rotation rot,
-			OnRotated r, OnWallHit wh) const {
-		return std::shared_ptr<LogicCommand>(new BasicRotateCommand(_logic, rot, r, wh));
+	virtual std::shared_ptr<LogicCommand> createRotateCommand(const rotation rot) const {
+		return std::shared_ptr<LogicCommand>(new BasicRotateCommand(_logic, rot));
 	}
 
-	virtual std::shared_ptr<LogicCommand> createDropCommand(OnDropped d) const {
-		return std::shared_ptr<LogicCommand>(new BasicDropCommand(_logic, d));
+	virtual std::shared_ptr<LogicCommand> createDropCommand() const {
+		return std::shared_ptr<LogicCommand>(new BasicDropCommand(_logic));
 	}
 };
 

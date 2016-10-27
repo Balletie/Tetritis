@@ -14,17 +14,12 @@ namespace window {
 		typedef std::map<sf::Keyboard::Key, std::shared_ptr<LogicCommand>> CommandMap;
 
 		CommandMap command_for_key = {
-			{ sf::Keyboard::Left, logic._command_factory->createMoveCommand(DIR_LEFT,
-				drawing.onMoved_cb(), drawing.onWallHit_cb()) },
-			{ sf::Keyboard::Right, logic._command_factory->createMoveCommand(DIR_RIGHT,
-				drawing.onMoved_cb(), drawing.onWallHit_cb()) },
-			{ sf::Keyboard::Down, logic._command_factory->createMoveCommand(DIR_DOWN,
-				drawing.onMoved_cb(), drawing.onWallHit_cb()) },
-			{ sf::Keyboard::Up, logic._command_factory->createDropCommand(drawing.onDropped_cb()) },
-			{ sf::Keyboard::Z, logic._command_factory->createRotateCommand(CCW,
-				drawing.onRotated_cb(), drawing.onWallHit_cb()) },
-			{ sf::Keyboard::X, logic._command_factory->createRotateCommand(CW,
-				drawing.onRotated_cb(), drawing.onWallHit_cb()) }
+			{ sf::Keyboard::Left, logic._command_factory->createMoveCommand(DIR_LEFT) },
+			{ sf::Keyboard::Right, logic._command_factory->createMoveCommand(DIR_RIGHT) },
+			{ sf::Keyboard::Down, logic._command_factory->createMoveCommand(DIR_DOWN) },
+			{ sf::Keyboard::Up, logic._command_factory->createDropCommand() },
+			{ sf::Keyboard::Z, logic._command_factory->createRotateCommand(CCW) },
+			{ sf::Keyboard::X, logic._command_factory->createRotateCommand(CW) }
 		};
 
 		bool handle_input() {

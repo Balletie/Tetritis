@@ -6,7 +6,12 @@ AnimatedDrawing::AnimatedDrawing(Logic& l, sf::RenderTarget& t)
 	: _start(std::chrono::steady_clock::now())
 	, _board(l._board), _current_tetro(l._current_tetro), _target(t)
 	, _tween(tweeny::from(0.f,0.f).to(0.f,0.f).during(1))
-{}
+{
+	l.addCallback(LogicEvent::Move, onMoved_cb());
+	l.addCallback(LogicEvent::Rotation, onRotated_cb());
+	l.addCallback(LogicEvent::WallHit, onWallHit_cb());
+	l.addCallback(LogicEvent::Drop, onDropped_cb());
+}
 
 void AnimatedDrawing::update() {
 	_tween.step(restartClock());

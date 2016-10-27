@@ -30,9 +30,9 @@ void BasicMoveCommand::perform() {
 	t.move(_dir);
 	if (!_logic._board.isOutOfSideBounds(t)) {
 		_logic.recordOnCollision(t);
-		_onMovedCallback(_dir);
+		_logic.callBack(LogicEvent::Move, _dir);
 	} else {
-		_onWallHitCallback(t);
+		_logic.callBack(LogicEvent::WallHit, t);
 	}
 }
 
@@ -44,11 +44,11 @@ void BasicRotateCommand::perform() {
 		if (!_logic._board.isOutOfSideBounds(t) && !_logic._board.collides(t)) {
 			Tetro::WallKickOffset off = t.getWallKickOffset(i);
 			_logic._current_tetro = t;
-			_onRotatedCallback(_rot, trans, off);
+			_logic.callBack(LogicEvent::Rotation, _rot, trans, off);
 			return;
 		}
 	}
-	_onWallHitCallback(_logic._current_tetro);
+	_logic.callBack(LogicEvent::WallHit, _logic._current_tetro);
 }
 
 void BasicDropCommand::perform() {
@@ -61,6 +61,6 @@ void BasicDropCommand::perform() {
 		i++;
 	}
 	_logic.record();
-	_onDroppedCallback(i - 1);
+	_logic.callBack(LogicEvent::Drop, i - 1);
 }
 
