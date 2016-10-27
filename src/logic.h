@@ -78,7 +78,6 @@ class Logic {
 	}
 
 	void update();
-	void recordOnCollision(Tetro&);
 	void record();
 
 	template <typename Func>

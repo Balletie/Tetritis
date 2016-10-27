@@ -17,20 +17,16 @@ void Logic::record() {
 	_current_tetro = TetroFactory::createRandomTetro();
 }
 
-void Logic::recordOnCollision(Tetro& t) {
-	if (_board.collides(t)) {
-		record();
-	} else {
-		_current_tetro = t;
-	}
-}
-
 void BasicMoveCommand::perform() {
 	Tetro t = _logic._current_tetro;
 	t.move(_dir);
 	if (!_logic._board.isOutOfSideBounds(t)) {
-		_logic.recordOnCollision(t);
-		_logic.callBack(LogicEvent::Move, _dir);
+		if (_logic._board.collides(t)) {
+			if (_dir == DIR_DOWN) _logic.record();
+		} else {
+			_logic._current_tetro = t;
+			_logic.callBack(LogicEvent::Move, _dir);
+		}
 	} else {
 		_logic.callBack(LogicEvent::WallHit, t);
 	}
