@@ -4,7 +4,7 @@
 #include "block.h"
 
 Tetro::Tetro(sf::Color c, BlockList blocks, const Tetro::WallKickOffsetRow (*wk_offsets)[4])
-	: _col(3), _row(5), _orntn(ZERO), _wall_kick_offsets(wk_offsets), _c(c)
+	: _col(4), _row(1), _orntn(ZERO), _wall_kick_offsets(wk_offsets), _c(c)
 	, _blocks(blocks) {}
 
 const sf::Color Tetro::Cyan(49, 199, 239);
