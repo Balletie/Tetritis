@@ -91,7 +91,7 @@ bool Board::isOutOfSideBounds(const Tetro& t, const TetroBlock& b) const {
 
 bool Board::isOutOfBottomBounds(const Tetro& t, const TetroBlock& b) const {
 	const int8_t fin_y = t.getFinalY(b);
-	if (fin_y < 1 || fin_y >= BOARD_HEIGHT)	return true;
+	if (fin_y < 0 || fin_y >= BOARD_HEIGHT)	return true;
 
 	return false;
 }
