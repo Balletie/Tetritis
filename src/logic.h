@@ -6,6 +6,7 @@
 #include <functional>
 #include <typeindex>
 #include <unordered_map>
+#include <thread>
 #include "board.h"
 
 class Logic;
@@ -107,6 +108,13 @@ class Logic {
 		}
 	}
 
+	void gravity();
+	void toggleGravity() {
+		_has_gravity = !_has_gravity;
+	}
+
+	~Logic();
+
 	Board _board;
 	Tetro _current_tetro;
 	std::unique_ptr<LogicCommandFactory> _command_factory;
@@ -116,6 +124,8 @@ class Logic {
 
   private:
 	std::unordered_map<LogicEvent, LogicEventCallbacks> _eventCallbacks;
+	std::thread _gravity_task;
+	bool _has_gravity;
 };
 
 class BasicMoveCommand : public LogicCommand {

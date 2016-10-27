@@ -33,6 +33,9 @@ namespace window {
 					switch (event.key.code) {
 						case sf::Keyboard::Escape:
 							return false;
+						case sf::Keyboard::G:
+							logic.toggleGravity();
+							break;
 						case sf::Keyboard::Return:
 							logic._current_tetro = TetroFactory::createRandomTetro();
 							break;

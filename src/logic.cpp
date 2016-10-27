@@ -2,7 +2,14 @@
 
 Logic::Logic()
 	: _current_tetro(TetroFactory::createRandomTetro())
-	, _command_factory(new BasicLogicCommandFactory(*this)) {}
+	, _command_factory(new BasicLogicCommandFactory(*this))
+	, _gravity_task(&Logic::gravity, this), _has_gravity(true)
+{}
+
+Logic::~Logic() {
+	this->_has_gravity = false;
+	_gravity_task.join();
+}
 
 void Logic::update() {
 	while (!_command_queue.empty()) {
@@ -15,6 +22,15 @@ void Logic::update() {
 void Logic::record() {
 	_board.record(_current_tetro);
 	_current_tetro = TetroFactory::createRandomTetro();
+}
+
+void Logic::gravity() {
+	std::shared_ptr<LogicCommand> moveDownCommand =
+		this->_command_factory->createMoveCommand(DIR_DOWN);
+	while (_has_gravity) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		this->enqueue(moveDownCommand);
+	}
 }
 
 void BasicMoveCommand::perform() {
