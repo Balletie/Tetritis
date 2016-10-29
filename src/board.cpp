@@ -56,7 +56,6 @@ std::map<uint8_t, Board> Board::deleteFullRows(uint8_t from, uint8_t to) {
 	from = toRowVectorIndex(to) + 1;
 	to = toRowVectorIndex(tempfrom) + 1;
 
-	int i = 0;
 	Board::const_iterator start = this->begin() + from;
 	for (Board::const_iterator it = start; it < this->begin() + to - accum_removed;) {
 		if (rowFull(*it)) {
@@ -74,6 +73,8 @@ std::map<uint8_t, Board> Board::deleteFullRows(uint8_t from, uint8_t to) {
 			it++;
 		}
 	}
+	if (cur_idx >= 0)
+		removedBoards.emplace((uint8_t) cur_idx, Board(std::move(cur_removed)));
 	return removedBoards;
 }
 
