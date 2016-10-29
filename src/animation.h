@@ -61,6 +61,7 @@ class AnimatedBoard : public AnimatedDrawable {
 	void draw(sf::RenderTarget&, sf::RenderStates) const override;
 
   private:
+	void addTweenForHeight(uint8_t);
 	std::map<uint8_t, Board> constructRemainingBoards();
 
 	Board& _board;

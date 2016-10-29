@@ -36,16 +36,26 @@ void AnimatedTetro::onDropped(uint8_t height) {
 }
 
 void AnimatedBoard::step(uint32_t dt) {
-	std::for_each(_tweens.begin(), _tweens.end(), [dt](tweeny::tween<float> t) {
-		t.step(dt);
-	});
+	for (auto it = _tweens.begin(); it < _tweens.end(); it++) {
+		it->step(dt);
+	}
 }
 
 void AnimatedBoard::draw(sf::RenderTarget& target, sf::RenderStates states) const {
-	for (auto it = _remaining_boards.begin(); it != _remaining_boards.end(); it++) {
-		states.transform = translation_mat(0, -1 * it->first * CELL_WIDTH_HEIGHT);
-		target.draw(it->second, states);
+	std::map<uint8_t, Board>::const_iterator bs = _remaining_boards.begin();
+	std::vector<tweeny::tween<float>>::const_iterator ts = _tweens.begin();
+	for (; ts != _tweens.end() && bs != _remaining_boards.end(); ++ts, bs++) {
+		states.transform = translation_mat(0, (-1 * bs->first) * CELL_WIDTH_HEIGHT + ts->peek());
+		target.draw(bs->second, states);
 	}
+}
+
+void AnimatedBoard::addTweenForHeight(uint8_t height) {
+	tweeny::tween<float> tw = tweeny::from(0.f)
+		.to((float) height * CELL_WIDTH_HEIGHT)
+		.during(400)
+		.via(tweeny::easing::bounceOut);
+	_tweens.push_back(tw);
 }
 
 std::map<uint8_t, Board> AnimatedBoard::constructRemainingBoards() {
@@ -53,26 +63,26 @@ std::map<uint8_t, Board> AnimatedBoard::constructRemainingBoards() {
 	uint8_t i = 0;
 	uint8_t accum_height = 0;
 	for (auto it = _removed_boards.begin(); it != _removed_boards.end(); it++) {
-		printf("rm rows(%u, %zu)\n", it->first, it->first + it->second.height());
 		if (it->first == i) {
 			accum_height += it->second.height();
 			continue;
 		}
 		uint8_t end = it->first - accum_height;
-		printf("%u -> rows(%u, %u)\n", i + accum_height, i, end);
 		Board&& remain = _board.subBoard(_board.begin() + i, _board.begin() + end);
 		remaining.emplace(i + accum_height, remain);
+		addTweenForHeight(accum_height);
 		i = it->first - accum_height;
 		accum_height += it->second.height();
 	}
 	if (_board.begin() + i != _board.end()) {
-		printf("%u -> rows(%u, end)\n", i + accum_height, i);
 		remaining.emplace(i + accum_height, _board.subBoard(_board.begin() + i, _board.end()));
+		addTweenForHeight(accum_height);
 	}
 	return remaining;
 }
 
 void AnimatedBoard::onTetroAdded(std::map<uint8_t, Board> bs) {
+	_tweens.clear();
 	_removed_boards = bs;
 	_remaining_boards = constructRemainingBoards();
 }
