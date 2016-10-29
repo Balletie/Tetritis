@@ -1,3 +1,5 @@
+#include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/BlendMode.hpp>
 #include "animation.h"
 #include "matrices.h"
 
@@ -39,9 +41,38 @@ void AnimatedBoard::step(uint32_t dt) {
 	for (auto it = _tweens.begin(); it < _tweens.end(); it++) {
 		it->step(dt);
 	}
+	_opacity_tween.step(dt);
 }
 
 void AnimatedBoard::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	drawRemoved(target, states);
+	drawRemaining(target, states);
+}
+
+void AnimatedBoard::drawRemoved(sf::RenderTarget& target, sf::RenderStates states) const {
+	if (_opacity_tween.peek() < 0)
+		return;
+	std::map<uint8_t, Board>::const_iterator rbs = _removed_boards.begin();
+	for (; rbs != _removed_boards.end(); rbs++) {
+		states.blendMode = sf::BlendAlpha;
+		sf::RectangleShape alpha(sf::Vector2f((float)BOARD_WIDTH*CELL_WIDTH_HEIGHT,
+			(float) rbs->second.height() * CELL_WIDTH_HEIGHT));
+		sf::Color c(255, 255, 255, _opacity_tween.peek());
+		alpha.setFillColor(c);
+		alpha.setPosition(0.f, CELL_WIDTH_HEIGHT * (BOARD_HEIGHT - rbs->second.height()) - rbs->first * CELL_WIDTH_HEIGHT);
+		states.transform = sf::Transform();
+		target.draw(alpha, states);
+
+		// This multiplies (r, g, b, a) * (1, 1, 1, tween_alpha), effectively setting
+		// the alpha channel for the pixels of the removed board.
+		states.blendMode = sf::BlendMultiply;
+		states.transform = translation_mat(0, -1 * rbs->first * CELL_WIDTH_HEIGHT);
+		target.draw(rbs->second, states);
+	}
+}
+
+void AnimatedBoard::drawRemaining(sf::RenderTarget& target, sf::RenderStates states) const {
+	states.blendMode = sf::BlendAlpha;
 	std::map<uint8_t, Board>::const_iterator bs = _remaining_boards.begin();
 	std::vector<tweeny::tween<float>>::const_iterator ts = _tweens.begin();
 	for (; ts != _tweens.end() && bs != _remaining_boards.end(); ++ts, bs++) {
@@ -85,4 +116,5 @@ void AnimatedBoard::onTetroAdded(std::map<uint8_t, Board> bs) {
 	_tweens.clear();
 	_removed_boards = bs;
 	_remaining_boards = constructRemainingBoards();
+	_opacity_tween.seek(0.f);
 }
