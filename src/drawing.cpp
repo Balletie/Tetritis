@@ -1,27 +1,28 @@
+#include <algorithm>
 #include "drawing.h"
 #include "matrices.h"
 #include "tweeny.h"
 
-AnimatedDrawing::AnimatedDrawing(Logic& l, sf::RenderTarget& t)
-	: _start(std::chrono::steady_clock::now())
-	, _board(l._board), _current_tetro(l._current_tetro), _target(t)
-	, _tween(tweeny::from(0.f,0.f).to(0.f,0.f).during(1))
+AnimatedDrawing::AnimatedDrawing(Logic& l, sf::RenderTarget& trgt)
+	: _start(std::chrono::steady_clock::now()), _target(trgt)
 {
-	l.addCallback(LogicEvent::Move, onMoved_cb());
-	l.addCallback(LogicEvent::Rotation, onRotated_cb());
-	l.addCallback(LogicEvent::WallHit, onWallHit_cb());
-	l.addCallback(LogicEvent::Drop, onDropped_cb());
+	AnimatedTetro *t = new AnimatedTetro(l._current_tetro);
+	l.addCallback(LogicEvent::Move, t->onMoved_cb());
+	l.addCallback(LogicEvent::Rotation, t->onRotated_cb());
+	l.addCallback(LogicEvent::Drop, t->onDropped_cb());
+	AnimatedBoard *b = new AnimatedBoard(l._board);
+	l.addCallback(LogicEvent::TetroAdded, b->onTetroAdded_cb());
+
+	_drawables.emplace_back(t);
+	_drawables.emplace_back(b);
 }
 
 void AnimatedDrawing::update() {
-	_tween.step(restartClock());
-	_target.draw(*this);
-}
-
-void AnimatedDrawing::draw(sf::RenderTarget& target, sf::RenderStates states) const {
-	target.draw(_board);
-	states.transform = this->_transform;
-	target.draw(_current_tetro, states);
+	uint32_t dt = restartClock();
+	std::for_each(_drawables.begin(), _drawables.end(), [dt,this](auto &d) {
+		d->step(dt);
+		_target.draw(*d);
+	});
 }
 
 uint32_t AnimatedDrawing::restartClock() {
@@ -29,40 +30,4 @@ uint32_t AnimatedDrawing::restartClock() {
 	std::chrono::milliseconds dt = std::chrono::duration_cast<std::chrono::milliseconds>(end - _start);
 	_start = end;
 	return dt.count();
-}
-
-void AnimatedDrawing::onMoved(direction dir, uint8_t height) {
-	_tween =
-		tweeny::from(
-			(float) (dir * CELL_WIDTH_HEIGHT / 2),
-			(float) (height * (dir - 1) % 2 * CELL_WIDTH_HEIGHT / 2))
-		.to(0.f,0.f)
-		.during(50)
-		.onStep([this](float x, float y) { _transform = translation_mat(x, y); return false; });
-}
-
-void AnimatedDrawing::onMoved(direction dir) {
-	this->onMoved(dir, 1);
-}
-
-void AnimatedDrawing::onRotated(rotation rot, Tetro::WallKickTranslation trans, Tetro::WallKickOffset off) {
-	float trans_x = (rot * trans.second - trans.first)  * 0.5;
-	float trans_y = (rot * trans.first  + trans.second) * 0.5;
-	float centerX = ((float)_current_tetro.getColumn() + trans_x) * CELL_WIDTH_HEIGHT + CELL_WIDTH_HEIGHT / 2;
-	float centerY = ((float)_current_tetro.getRow() + trans_y) * CELL_WIDTH_HEIGHT + CELL_WIDTH_HEIGHT / 2;
-	_tween =
-		tweeny::from((float) -1 * rot * 90.f, 0.f)
-		.to(0.f, 0.f)
-		.during(50)
-		.onStep([this,centerX,centerY,off](float t, float) {
-			_transform = translation_mat(-off.first, -off.second).rotate(t, centerX, centerY);
-			return false;
-		});
-}
-
-void AnimatedDrawing::onWallHit(Tetro t) {
-}
-
-void AnimatedDrawing::onDropped(uint8_t height) {
-	this->onMoved(DIR_DOWN, height);
 }

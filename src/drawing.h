@@ -3,37 +3,23 @@
 #include <chrono>
 #include <SFML/Graphics.hpp>
 
-#include "tweeny.h"
 #include "macros.h"
-#include "logic.h"
+#include "animation.h"
 
-class AnimatedDrawing : public sf::Drawable {
+class AnimatedDrawing {
   public:
 	AnimatedDrawing(Logic&, sf::RenderTarget&);
-
-	REGISTER_CALLBACK(onMoved, direction)
-	REGISTER_CALLBACK(onRotated, rotation, Tetro::WallKickTranslation,
-		Tetro::WallKickOffset)
-	REGISTER_CALLBACK(onWallHit, Tetro)
-	REGISTER_CALLBACK(onDropped, uint8_t)
 
 	void update();
 
   private:
 	uint32_t restartClock();
-	void onMoved(direction, uint8_t);
 
 	std::chrono::steady_clock::time_point _start;
 
   protected:
-	void draw(sf::RenderTarget&, sf::RenderStates) const;
-
-	Board& _board;
-	Tetro& _current_tetro;
+	std::vector<std::unique_ptr<AnimatedDrawable>> _drawables;
 	sf::RenderTarget& _target;
-	sf::Transform _transform;
-
-	tweeny::tween<float, float> _tween;
 };
 
 #endif /* DRAWING_H */

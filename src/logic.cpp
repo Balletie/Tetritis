@@ -19,9 +19,12 @@ void Logic::update() {
 	}
 }
 
-void Logic::record() {
-	_board.record(_current_tetro);
+std::map<uint8_t, Board> Logic::record() {
+	std::pair<uint8_t, uint8_t> minmax_row = _board.record(_current_tetro);
+	std::map<uint8_t, Board> removed_boards = _board.deleteFullRows(
+		minmax_row.first, minmax_row.second + 1);
 	_current_tetro = TetroFactory::createRandomTetro();
+	return removed_boards;
 }
 
 void Logic::gravity() {
@@ -38,7 +41,10 @@ void BasicMoveCommand::perform() {
 	t.move(_dir);
 	if (!_logic._board.isOutOfSideBounds(t)) {
 		if (_logic._board.collides(t)) {
-			if (_dir == DIR_DOWN) _logic.record();
+			if (_dir == DIR_DOWN) {
+				std::map<uint8_t, Board> removed_boards = _logic.record();
+				_logic.callBack(LogicEvent::TetroAdded, removed_boards);
+			}
 		} else {
 			_logic._current_tetro = t;
 			_logic.callBack(LogicEvent::Move, _dir);
@@ -72,7 +78,8 @@ void BasicDropCommand::perform() {
 		cur.move(DIR_DOWN);
 		i++;
 	}
-	_logic.record();
-	_logic.callBack(LogicEvent::Drop, i - 1);
+	std::map<uint8_t, Board> removed_boards = _logic.record();
+	_logic.callBack(LogicEvent::Drop, (uint8_t) (i - 1));
+	_logic.callBack(LogicEvent::TetroAdded, removed_boards);
 }
 

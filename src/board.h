@@ -15,13 +15,19 @@ class Board : public sf::Drawable {
 	Board();
 	bool collides(const Tetro&) const;
 	bool isOutOfSideBounds(const Tetro&) const;
-	void record(const Tetro&);
+
+	/*
+	 * Records the given tetrominos to the board. That is, it takes each of its
+	 * blocks and stores it in the board as BoardBlocks. Returns the row index
+	 * range that the tetrominos spanned.
+	 */
+	std::pair<uint8_t, uint8_t> record(const Tetro&);
 
 	/*
 	 * Deletes the rows that are full between the given range, which is
-	 * (inclusive, exclusive].
+	 * (inclusive, exclusive]. Returns the deleted rows.
 	 */
-	void deleteFullRows(uint8_t, uint8_t);
+	std::map<uint8_t, Board> deleteFullRows(uint8_t, uint8_t);
 
 	typedef std::vector<Row>::const_iterator const_iterator;
 
@@ -33,11 +39,19 @@ class Board : public sf::Drawable {
 		return this->_rows.end();
 	}
 
+	Board subBoard(const_iterator begin, const_iterator end) {
+		return Board(std::vector<Row>(begin, end));
+	}
+
+	size_t height() const;
+	size_t size() const;
+
   protected:
 	void draw(sf::RenderTarget&, sf::RenderStates) const;
 
   private:
-	size_t size() const;
+	/* Private constructor for creating a board from a vector of rows. */
+	Board(std::vector<Row>&& rows) : _rows(rows) {};
 
 	/*
 	 * The row indices of the vector are inverted with respect to the row

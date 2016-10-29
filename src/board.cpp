@@ -25,7 +25,7 @@ bool Board::isOutOfSideBounds(const Tetro& t) const {
 	return false;
 }
 
-void Board::record(const Tetro& t) {
+std::pair<uint8_t, uint8_t> Board::record(const Tetro& t) {
 	uint8_t min_y = BOARD_HEIGHT;
 	uint8_t max_y = 0;
 	for (Tetro::const_iterator bs = t.begin(); bs != t.end(); bs++) {
@@ -43,19 +43,38 @@ void Board::record(const Tetro& t) {
 
 		_rows[toRowVectorIndex(fin_y)].emplace(fin_x, BoardBlock(t.getColor()));
 	}
-	this->deleteFullRows(min_y, max_y + 1);
+	return std::make_pair(min_y, max_y);
 }
 
-void Board::deleteFullRows(uint8_t from, uint8_t to) {
+std::map<uint8_t, Board> Board::deleteFullRows(uint8_t from, uint8_t to) {
+	std::map<uint8_t, Board> removedBoards;
+	std::vector<Row> cur_removed;
+	int8_t cur_idx = -1;
+	uint8_t accum_removed = 0;
+
 	uint8_t tempfrom = from;
 	from = toRowVectorIndex(to) + 1;
 	to = toRowVectorIndex(tempfrom) + 1;
-	for (Board::const_iterator it = this->begin() + from; it < this->begin() + to;) {
-		if (rowFull(*it))
+
+	int i = 0;
+	Board::const_iterator start = this->begin() + from;
+	for (Board::const_iterator it = start; it < this->begin() + to - accum_removed;) {
+		if (rowFull(*it)) {
+			if (cur_idx < 0)
+				cur_idx = std::distance(start, it) + from + accum_removed;
+			cur_removed.push_back(*it);
 			it = _rows.erase(it);
-		else
+			accum_removed++;
+		} else {
+			if (cur_idx >= 0) {
+				removedBoards.emplace((uint8_t) cur_idx, Board(std::move(cur_removed)));
+				cur_removed = std::vector<Row>();
+				cur_idx = -1;
+			}
 			it++;
+		}
 	}
+	return removedBoards;
 }
 
 void Board::draw(sf::RenderTarget& target, sf::RenderStates states) const {
@@ -94,6 +113,10 @@ bool Board::isOutOfBottomBounds(const Tetro& t, const TetroBlock& b) const {
 	if (fin_y < 0 || fin_y >= BOARD_HEIGHT)	return true;
 
 	return false;
+}
+
+size_t Board::height() const {
+	return _rows.size();
 }
 
 size_t Board::size() const {

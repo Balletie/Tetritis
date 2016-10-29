@@ -14,6 +14,7 @@ class Logic;
 enum class LogicEvent {
 	Move,
 	Rotation,
+	TetroAdded,
 	WallHit,
 	Drop
 };
@@ -79,8 +80,9 @@ class Logic {
 	}
 
 	void update();
-	void record();
+	std::map<uint8_t, Board> record();
 
+	/* Adapted from http://stackoverflow.com/a/16884259 */
 	template <typename Func>
 	void addCallback(LogicEvent id, std::function<Func> func) {
 		const std::type_index listeners_index(typeid(Func));
@@ -95,8 +97,9 @@ class Logic {
 
 		std::type_index listeners_index(typeid(Func));
 		auto cbs = _eventCallbacks.find(id);
-		if (cbs == _eventCallbacks.end())
+		if (cbs == _eventCallbacks.end()) {
 			return; // No callbacks found for this type of event.
+		}
 
 		auto range = cbs->second.equal_range(listeners_index);
 		for (auto it = range.first; it != range.second; it++) {
