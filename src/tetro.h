@@ -33,10 +33,10 @@ class Tetro : public sf::Drawable {
 		return this->_blocks.end();
 	};
 
-	const uint8_t getColumn() const;
-	const uint8_t getRow() const;
-	const int8_t getFinalX(const TetroBlock&) const;
-	const int8_t getFinalY(const TetroBlock&) const;
+	uint8_t getColumn() const;
+	uint8_t getRow() const;
+	int8_t getFinalX(const TetroBlock&) const;
+	int8_t getFinalY(const TetroBlock&) const;
 	sf::Color getColor() const;
 	WallKickOffset getWallKickOffset(uint8_t);
 

@@ -42,19 +42,19 @@ const Tetro::WallKickOffsetRow Tetro::o_offsets[4] {
 	{{-1, 0}}
 };
 
-const uint8_t Tetro::getColumn() const {
+uint8_t Tetro::getColumn() const {
 	return this->_col;
 }
 
-const uint8_t Tetro::getRow() const {
+uint8_t Tetro::getRow() const {
 	return this->_row;
 }
 
-const int8_t Tetro::getFinalX(const TetroBlock& b) const {
+int8_t Tetro::getFinalX(const TetroBlock& b) const {
 	return (int8_t)this->_col + b._x;
 }
 
-const int8_t Tetro::getFinalY(const TetroBlock& b) const {
+int8_t Tetro::getFinalY(const TetroBlock& b) const {
 	return (int8_t)this->_row - b._y;
 }
 
