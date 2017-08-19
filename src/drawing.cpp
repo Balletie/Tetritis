@@ -2,6 +2,7 @@
 #include "drawing.h"
 #include "matrices.h"
 #include "tweeny.h"
+#include "ghost_tetro.h"
 
 AnimatedDrawing::AnimatedDrawing(Logic& l, sf::RenderTarget& trgt)
 	: _start(std::chrono::steady_clock::now()), _target(trgt)
@@ -10,11 +11,18 @@ AnimatedDrawing::AnimatedDrawing(Logic& l, sf::RenderTarget& trgt)
 	l.addCallback(LogicEvent::Move, t->onMoved_cb());
 	l.addCallback(LogicEvent::Rotation, t->onRotated_cb());
 	l.addCallback(LogicEvent::Drop, t->onDropped_cb());
+
 	AnimatedBoard *b = new AnimatedBoard(l._board);
 	l.addCallback(LogicEvent::TetroAdded, b->onTetroAdded_cb());
 
+	GhostTetro *gt = new GhostTetro(l);
+	l.addCallback(LogicEvent::Move, gt->onMoved_cb());
+	l.addCallback(LogicEvent::Rotation, gt->onRotated_cb());
+	l.addCallback(LogicEvent::Drop, gt->onDropped_cb());
+
 	_drawables.emplace_back(t);
 	_drawables.emplace_back(b);
+	_drawables.emplace_back(gt);
 }
 
 void AnimatedDrawing::update() {

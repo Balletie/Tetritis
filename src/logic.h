@@ -9,7 +9,7 @@
 #include <thread>
 #include "board.h"
 
-class Logic;
+class AbstractLogic;
 
 enum class LogicEvent {
 	Move,
@@ -30,17 +30,17 @@ namespace std {
 
 class LogicCommand {
   public:
-	LogicCommand(Logic& l) : _logic(l) {}
+	LogicCommand(AbstractLogic& l) : _logic(l) {}
 	virtual void perform() = 0;
 
 	virtual ~LogicCommand() {}
   protected:
-	Logic& _logic;
+	AbstractLogic& _logic;
 };
 
 class LogicCommandFactory {
   public:
-	LogicCommandFactory(Logic& l) : _logic(l) {}
+	LogicCommandFactory(AbstractLogic& l) : _logic(l) {}
 
 	virtual std::shared_ptr<LogicCommand> createMoveCommand(const direction) const = 0;
 	virtual std::shared_ptr<LogicCommand> createRotateCommand(const rotation) const = 0;
@@ -49,10 +49,10 @@ class LogicCommandFactory {
 	virtual ~LogicCommandFactory() {}
 
   protected:
-	Logic& _logic;
+	AbstractLogic& _logic;
 };
 
-class Logic {
+class AbstractLogic {
   private:
 	/* Wrapper with no template arguments, so that any function type can be
 	 * stored in the same container. */
@@ -73,14 +73,14 @@ class Logic {
 		LogicEventCallbacks;
 
   public:
-	Logic();
+	virtual Tetro& getCurrentTetro() = 0;
+	virtual Tetro getCurrentTetro() const = 0;
+	virtual const Board& getBoard() const = 0;
 
-	void enqueue(std::shared_ptr<LogicCommand> lc) {
-		_command_queue.push(std::move(lc));
-	}
-
+	void enqueue(std::shared_ptr<LogicCommand>);
 	void update();
-	std::map<uint8_t, Board> record();
+
+	virtual void record() = 0;
 
 	/* Adapted from http://stackoverflow.com/a/16884259 */
 	template <typename Func>
@@ -111,6 +111,31 @@ class Logic {
 		}
 	}
 
+  protected:
+	std::queue<std::shared_ptr<LogicCommand>> _command_queue;
+
+  private:
+	std::unordered_map<LogicEvent, LogicEventCallbacks> _eventCallbacks;
+};
+
+class Logic : public AbstractLogic {
+  public:
+	Logic();
+
+	Tetro& getCurrentTetro() override {
+		return _current_tetro;
+	}
+
+	Tetro getCurrentTetro() const {
+		return _current_tetro;
+	}
+
+	const Board& getBoard() const {
+		return _board;
+	}
+
+	void record() override;
+
 	void gravity();
 	void toggleGravity() {
 		_has_gravity = !_has_gravity;
@@ -122,18 +147,14 @@ class Logic {
 	Tetro _current_tetro;
 	std::unique_ptr<LogicCommandFactory> _command_factory;
 
-  protected:
-	std::queue<std::shared_ptr<LogicCommand>> _command_queue;
-
   private:
-	std::unordered_map<LogicEvent, LogicEventCallbacks> _eventCallbacks;
 	std::thread _gravity_task;
 	bool _has_gravity;
 };
 
 class BasicMoveCommand : public LogicCommand {
   public:
-	BasicMoveCommand(Logic& l, direction dir)
+	BasicMoveCommand(AbstractLogic& l, direction dir)
 		: LogicCommand(l), _dir(dir) {}
 	void perform() override;
 
@@ -143,7 +164,7 @@ class BasicMoveCommand : public LogicCommand {
 
 class BasicRotateCommand : public LogicCommand {
   public:
-	BasicRotateCommand(Logic& l, rotation rot)
+	BasicRotateCommand(AbstractLogic& l, rotation rot)
 		: LogicCommand(l), _rot(rot) {}
 
 	void perform() override;
@@ -154,13 +175,13 @@ class BasicRotateCommand : public LogicCommand {
 
 class BasicDropCommand : public LogicCommand {
   public:
-	BasicDropCommand(Logic& l) : LogicCommand(l) {}
+	BasicDropCommand(AbstractLogic& l) : LogicCommand(l) {}
 	void perform() override;
 };
 
 class BasicLogicCommandFactory : public LogicCommandFactory {
   public:
-	BasicLogicCommandFactory(Logic& l) : LogicCommandFactory(l) {}
+	BasicLogicCommandFactory(AbstractLogic& l) : LogicCommandFactory(l) {}
 	virtual std::shared_ptr<LogicCommand> createMoveCommand(const direction dir) const {
 		return std::shared_ptr<LogicCommand>(new BasicMoveCommand(_logic, dir));
 	}

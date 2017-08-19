@@ -13,8 +13,10 @@
 #include "movements.h"
 
 class TetroFactory;
+class GhostTetro;
 
 class Tetro : public sf::Drawable {
+	friend GhostTetro;
 	public:
 
 	typedef std::vector<TetroBlock> BlockList;
