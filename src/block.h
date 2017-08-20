@@ -22,7 +22,7 @@ struct TetroBlock {
 	 * Function for drawing to the given vertex array with the given transform,
 	 * which can be in board coordinates or tetrominos coordinates.
 	 */
-	void drawVertices(sf::Vertex*, const sf::Transform&, const sf::Color&) const;
+	void drawVertices(sf::Vertex*, const sf::Color&) const;
 
 	// The x and y coordinates are relative to the center of a tetrominos.
 	int8_t _x;

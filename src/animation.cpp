@@ -6,8 +6,8 @@
 void AnimatedTetro::onMoved(direction dir, uint8_t height) {
 	_tween =
 		tweeny::from(
-			(float) (dir * CELL_WIDTH_HEIGHT / 2),
-			(float) (height * (dir - 1) % 2 * CELL_WIDTH_HEIGHT / 2))
+			(float) dir,
+			(float) height * fmodf(dir - 1, 2.f))
 		.to(0.f,0.f)
 		.during(50)
 		.onStep([this](float x, float y) { _transform = translation_mat(x, y); return false; });
@@ -20,8 +20,8 @@ void AnimatedTetro::onMoved(direction dir) {
 void AnimatedTetro::onRotated(rotation rot, Tetro::WallKickTranslation trans, Tetro::WallKickOffset off) {
 	float trans_x = (rot * trans.second - trans.first)  * 0.5;
 	float trans_y = (rot * trans.first  + trans.second) * 0.5;
-	float centerX = ((float)_drawable.getColumn() + trans_x) * CELL_WIDTH_HEIGHT + CELL_WIDTH_HEIGHT / 2;
-	float centerY = ((float)_drawable.getRow() + trans_y) * CELL_WIDTH_HEIGHT + CELL_WIDTH_HEIGHT / 2;
+	float centerX = ((float)_drawable.getColumn() + trans_x) + 0.5;
+	float centerY = ((float)_drawable.getRow() + trans_y) + 0.5;
 	_tween =
 		tweeny::from((float) -1 * rot * 90.f, 0.f)
 		.to(0.f, 0.f)
@@ -55,18 +55,18 @@ void AnimatedBoard::drawRemoved(sf::RenderTarget& target, sf::RenderStates state
 	std::map<uint8_t, Board>::const_iterator rbs = _removed_boards.begin();
 	for (; rbs != _removed_boards.end(); rbs++) {
 		states.blendMode = sf::BlendAlpha;
-		sf::RectangleShape alpha(sf::Vector2f((float)BOARD_WIDTH*CELL_WIDTH_HEIGHT,
-			(float) rbs->second.height() * CELL_WIDTH_HEIGHT));
+		sf::RectangleShape alpha(sf::Vector2f((float) BOARD_WIDTH,
+			(float) rbs->second.height()));
 		sf::Color c(255, 255, 255, _opacity_tween.peek());
 		alpha.setFillColor(c);
-		alpha.setPosition(0.f, CELL_WIDTH_HEIGHT * (BOARD_HEIGHT - rbs->second.height()) - rbs->first * CELL_WIDTH_HEIGHT);
+		alpha.setPosition(0.f, BOARD_HEIGHT - rbs->second.height() - rbs->first);
 		states.transform = sf::Transform();
 		target.draw(alpha, states);
 
 		// This multiplies (r, g, b, a) * (1, 1, 1, tween_alpha), effectively setting
 		// the alpha channel for the pixels of the removed board.
 		states.blendMode = sf::BlendMultiply;
-		states.transform = translation_mat(0, -1 * rbs->first * CELL_WIDTH_HEIGHT);
+		states.transform = translation_mat(0, -1 * rbs->first);
 		target.draw(rbs->second, states);
 	}
 }
@@ -76,14 +76,14 @@ void AnimatedBoard::drawRemaining(sf::RenderTarget& target, sf::RenderStates sta
 	std::map<uint8_t, Board>::const_iterator bs = _remaining_boards.begin();
 	std::vector<tweeny::tween<float>>::const_iterator ts = _tweens.begin();
 	for (; ts != _tweens.end() && bs != _remaining_boards.end(); ++ts, bs++) {
-		states.transform = translation_mat(0, (-1 * bs->first) * CELL_WIDTH_HEIGHT + ts->peek());
+		states.transform = translation_mat(0, -1 * bs->first + ts->peek());
 		target.draw(bs->second, states);
 	}
 }
 
 void AnimatedBoard::addTweenForHeight(uint8_t height) {
 	tweeny::tween<float> tw = tweeny::from(0.f)
-		.to((float) height * CELL_WIDTH_HEIGHT)
+		.to((float) height)
 		.during(400)
 		.via(tweeny::easing::bounceOut);
 	_tweens.push_back(tw);

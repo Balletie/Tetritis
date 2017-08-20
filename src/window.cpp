@@ -8,6 +8,7 @@ namespace window {
 	namespace {
 		bool running = true;
 		sf::RenderWindow window;
+		sf::View boardView(sf::FloatRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT));
 		Logic logic;
 		AnimatedDrawing drawing(logic, window);
 
@@ -60,6 +61,7 @@ namespace window {
 			running = handle_input();
 			logic.update();
 			window.clear();
+			window.setView(boardView);
 			drawing.update();
 			window.display();
 			std::this_thread::sleep_for(std::chrono::milliseconds(16));
@@ -69,8 +71,9 @@ namespace window {
 	}
 
 	bool open() {
-		window.create(	sf::VideoMode(	CELL_WIDTH_HEIGHT*BOARD_WIDTH,
-						CELL_WIDTH_HEIGHT*BOARD_HEIGHT),
+		window.create(
+				sf::VideoMode(CELL_WIDTH_HEIGHT*BOARD_WIDTH,
+					 CELL_WIDTH_HEIGHT*BOARD_HEIGHT),
 				"Tetritis",
 				sf::Style::Close | sf::Style::Titlebar);
 		return true;

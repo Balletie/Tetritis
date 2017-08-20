@@ -89,8 +89,8 @@ void Board::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 			sf::Vertex* quad = &vertices[4*i];
 			uint8_t col  = bl_it->first;
 			BoardBlock bl = bl_it->second;
-			uint16_t x = CELL_WIDTH_HEIGHT * col;
-			uint16_t y = CELL_WIDTH_HEIGHT * (BOARD_HEIGHT - row - 1);
+			uint16_t x = col;
+			uint16_t y = BOARD_HEIGHT - row - 1;
 			bl.drawVertices(quad, x, y);
 		}
 	}
