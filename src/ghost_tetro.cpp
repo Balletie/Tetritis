@@ -7,6 +7,9 @@ GhostTetro::GhostTetro(AbstractLogic& l)
 	, _drop_command(BasicLogicCommandFactory(_gl).createDropCommand())
 {
 	updateGhost();
+	l.addCallback(LogicEvent::Move, this->onMoved_cb());
+	l.addCallback(LogicEvent::Rotation, this->onRotated_cb());
+	l.addCallback(LogicEvent::Drop, this->onDropped_cb());
 }
 
 void GhostTetro::updateGhost() {

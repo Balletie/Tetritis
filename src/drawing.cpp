@@ -16,9 +16,6 @@ AnimatedDrawing::AnimatedDrawing(Logic& l, sf::RenderTarget& trgt)
 	l.addCallback(LogicEvent::TetroAdded, b->onTetroAdded_cb());
 
 	GhostTetro *gt = new GhostTetro(l);
-	l.addCallback(LogicEvent::Move, gt->onMoved_cb());
-	l.addCallback(LogicEvent::Rotation, gt->onRotated_cb());
-	l.addCallback(LogicEvent::Drop, gt->onDropped_cb());
 
 	_drawables.emplace_back(t);
 	_drawables.emplace_back(b);
