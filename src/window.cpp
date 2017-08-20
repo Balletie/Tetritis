@@ -23,11 +23,34 @@ namespace window {
 			{ sf::Keyboard::X, logic._command_factory->createRotateCommand(CW) }
 		};
 
+		void fit_board_to_screen(float width, float height) {
+			float boardRatio = (float) BOARD_WIDTH / (float) BOARD_HEIGHT;
+			float screenRatio = width / height;
+			float boardWidth = CELL_WIDTH_HEIGHT * BOARD_WIDTH;
+			float boardHeight = CELL_WIDTH_HEIGHT * BOARD_HEIGHT;
+			if (screenRatio > boardRatio) {
+				width = boardWidth * height / boardHeight / width;
+				height = 1;
+			} else {
+				height = boardHeight * width / boardWidth / height;
+				width = 1;
+			}
+			sf::FloatRect viewPort = sf::FloatRect(0.5 - width / 2,
+																						 0.5 - height / 2,
+																						 width,
+																						 height);
+			boardView.setViewport(viewPort);
+		}
+
 		bool handle_input() {
 			sf::Event event;
 			while (window.pollEvent(event)) {
 				if (event.type == sf::Event::Closed) {
 					return false;
+				}
+
+				if (event.type == sf::Event::Resized) {
+					fit_board_to_screen(event.size.width, event.size.height);
 				}
 
 				if (event.type == sf::Event::KeyPressed) {
