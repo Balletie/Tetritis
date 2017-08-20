@@ -13,7 +13,7 @@ void AbstractLogic::update() {
 }
 
 Logic::Logic()
-	: _current_tetro(TetroFactory::createRandomTetro())
+	: _current_tetro(_tetro_factory.next())
 	, _command_factory(new BasicLogicCommandFactory(*this))
 	, _gravity_task(&Logic::gravity, this), _has_gravity(true)
 {}
@@ -27,7 +27,7 @@ void Logic::record() {
 	std::pair<uint8_t, uint8_t> minmax_row = _board.record(_current_tetro);
 	std::map<uint8_t, Board> removed_boards = _board.deleteFullRows(
 		minmax_row.first, minmax_row.second + 1);
-	_current_tetro = TetroFactory::createRandomTetro();
+	_current_tetro = _tetro_factory.next();
 	this->callBack(LogicEvent::TetroAdded, removed_boards);
 }
 

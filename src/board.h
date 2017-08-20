@@ -39,7 +39,7 @@ class Board : public sf::Drawable {
 		return this->_rows.end();
 	}
 
-	Board subBoard(const_iterator begin, const_iterator end) {
+	Board subBoard(const_iterator begin, const_iterator end) const {
 		return Board(std::vector<Row>(begin, end));
 	}
 

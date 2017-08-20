@@ -7,12 +7,12 @@
 AnimatedDrawing::AnimatedDrawing(Logic& l, sf::RenderTarget& trgt)
 	: _start(std::chrono::steady_clock::now()), _target(trgt)
 {
-	AnimatedTetro *t = new AnimatedTetro(l._current_tetro);
+	AnimatedTetro *t = new AnimatedTetro(l.getCurrentTetro());
 	l.addCallback(LogicEvent::Move, t->onMoved_cb());
 	l.addCallback(LogicEvent::Rotation, t->onRotated_cb());
 	l.addCallback(LogicEvent::Drop, t->onDropped_cb());
 
-	AnimatedBoard *b = new AnimatedBoard(l._board);
+	AnimatedBoard *b = new AnimatedBoard(l.getBoard());
 	l.addCallback(LogicEvent::TetroAdded, b->onTetroAdded_cb());
 
 	GhostTetro *gt = new GhostTetro(l);

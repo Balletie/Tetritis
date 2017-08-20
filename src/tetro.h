@@ -1,7 +1,8 @@
 #ifndef TETRO_H
 #define TETRO_H
 
-#include <vector>
+#include <array>
+#include <random>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
@@ -25,7 +26,7 @@ class Tetro : public sf::Drawable {
 	typedef std::pair<int8_t, int8_t> WallKickTranslation;
 	typedef std::vector<WallKickOffset> WallKickOffsetRow;
 
-	friend class TetroFactory;
+	friend class AbstractTetroFactory;
 
 	const const_iterator begin() const {
 		return this->_blocks.begin();
@@ -74,17 +75,11 @@ class Tetro : public sf::Drawable {
 	BlockList _blocks;
 };
 
-class TetroFactory {
+class AbstractTetroFactory {
   public:
 	typedef Tetro (* TetroCreator)();
 
-	static Tetro createRandomTetro() {
-		static TetroCreator creators[] = {
-			&createI, &createJ, &createL, &createO, &createS, &createT, &createZ
-		};
-		const unsigned int numTetro = sizeof(creators)/sizeof(*creators);
-		return creators[rand() % numTetro]();
-	}
+	virtual Tetro next() = 0;
 
 	static Tetro createI() {
 		return Tetro(Tetro::Cyan, {
@@ -133,6 +128,26 @@ class TetroFactory {
 			         {0, 0}, {1, 0}
 		});
 	}
+};
+
+class GuidelineTetroFactory : AbstractTetroFactory {
+  public:
+	GuidelineTetroFactory() : _random_generator(std::random_device{}()), it(_creators.end()) {}
+
+	Tetro next() {
+		if (it == _creators.end()) {
+			std::shuffle(_creators.begin(), _creators.end(), _random_generator);
+			it = _creators.begin();
+		}
+		return (*it++)();
+	}
+
+  private:
+	std::array<TetroCreator, 7> _creators {{
+		&createI, &createJ, &createL, &createO, &createS, &createT, &createZ
+	}};
+	std::mt19937 _random_generator;
+	std::array<TetroCreator, 7>::iterator it;
 };
 
 #endif /* TETRO_H */

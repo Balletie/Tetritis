@@ -60,9 +60,6 @@ namespace window {
 						case sf::Keyboard::G:
 							logic.toggleGravity();
 							break;
-						case sf::Keyboard::Return:
-							logic._current_tetro = TetroFactory::createRandomTetro();
-							break;
 						default:
 							auto entry = command_for_key.find(event.key.code);
 							if (entry != command_for_key.end()) {

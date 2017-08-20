@@ -49,7 +49,7 @@ class AnimatedTetro : public TransformingDrawable<Tetro, float, float> {
 
 class AnimatedBoard : public AnimatedDrawable {
   public:
-	AnimatedBoard(Board& b) : _board(b)
+	AnimatedBoard(const Board& b) : _board(b)
 		, _remaining_boards(constructRemainingBoards())
 		, _opacity_tween(tweeny::from(255).to(-1).during(200))
 	{
@@ -71,7 +71,7 @@ class AnimatedBoard : public AnimatedDrawable {
 	void addTweenForHeight(uint8_t);
 	std::map<uint8_t, Board> constructRemainingBoards();
 
-	Board& _board;
+	const Board& _board;
 	std::map<uint8_t, Board> _removed_boards;
 	std::map<uint8_t, Board> _remaining_boards;
 	std::vector<tweeny::tween<float>> _tweens;

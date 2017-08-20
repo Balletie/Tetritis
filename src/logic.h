@@ -143,13 +143,15 @@ class Logic : public AbstractLogic {
 
 	~Logic();
 
-	Board _board;
-	Tetro _current_tetro;
 	std::unique_ptr<LogicCommandFactory> _command_factory;
 
   private:
 	std::thread _gravity_task;
 	bool _has_gravity;
+	GuidelineTetroFactory _tetro_factory;
+
+	Board _board;
+	Tetro _current_tetro;
 };
 
 class BasicMoveCommand : public LogicCommand {
