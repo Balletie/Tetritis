@@ -25,9 +25,9 @@ void AnimatedTetro::onRotated(rotation rot, Tetro::WallKickTranslation trans, Te
 	_tween =
 		tweeny::from((float) -1 * rot * 90.f, 0.f)
 		.to(0.f, 0.f)
-		.during(50)
-		.onStep([this,centerX,centerY,off](float t, float) {
-			_transform = translation_mat(-off.first, -off.second).rotate(t, centerX, centerY);
+		.during(100)
+		.onStep([this,centerX,centerY](float t, float) {
+			_transform = rotation_mat(t, centerX, centerY);
 			return false;
 		});
 }
