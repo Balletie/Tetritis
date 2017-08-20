@@ -30,7 +30,7 @@ class TransformingDrawable : public AnimatedDrawable {
 
   protected:
 	sf::Transform _transform;
-	Dr& _drawable;
+	const Dr& _drawable;
 	tweeny::tween<T, Ts...> _tween;
 };
 
