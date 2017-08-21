@@ -60,13 +60,12 @@ void AnimatedBoard::drawRemoved(sf::RenderTarget& target, sf::RenderStates state
 		sf::Color c(255, 255, 255, _opacity_tween.peek());
 		alpha.setFillColor(c);
 		alpha.setPosition(0.f, BOARD_HEIGHT - rbs->second.height() - rbs->first);
-		states.transform = sf::Transform();
 		target.draw(alpha, states);
 
 		// This multiplies (r, g, b, a) * (1, 1, 1, tween_alpha), effectively setting
 		// the alpha channel for the pixels of the removed board.
 		states.blendMode = sf::BlendMultiply;
-		states.transform = translation_mat(0, -1 * rbs->first);
+		states.transform *= translation_mat(0, -1 * rbs->first);
 		target.draw(rbs->second, states);
 	}
 }
@@ -76,7 +75,7 @@ void AnimatedBoard::drawRemaining(sf::RenderTarget& target, sf::RenderStates sta
 	std::map<uint8_t, Board>::const_iterator bs = _remaining_boards.begin();
 	std::vector<tweeny::tween<float>>::const_iterator ts = _tweens.begin();
 	for (; ts != _tweens.end() && bs != _remaining_boards.end(); ++ts, bs++) {
-		states.transform = translation_mat(0, -1 * bs->first + ts->peek());
+		states.transform *= translation_mat(0, -1 * bs->first + ts->peek());
 		target.draw(bs->second, states);
 	}
 }

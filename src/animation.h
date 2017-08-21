@@ -24,7 +24,7 @@ class TransformingDrawable : public AnimatedDrawable {
 
   protected:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const {
-		states.transform = this->_transform;
+		states.transform *= this->_transform;
 		target.draw(_drawable, states);
 	}
 
