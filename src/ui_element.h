@@ -58,7 +58,7 @@ class AnimatedPlayfield : public InterfaceElement {
 class Interface {
   public:
 	Interface(sf::RenderTarget& target, Logic& l)
-		: Interface(target, l, sf::View(sf::FloatRect(0, 0, 12, 24)))
+		: Interface(target, l, sf::View(sf::FloatRect(0, 0, BOARD_WIDTH + 2, BOARD_HEIGHT + 2)))
 	{}
 
 	Interface(sf::RenderTarget& target, Logic& l, sf::View view)
@@ -80,7 +80,7 @@ class Interface {
   private:
   void keepAspectRatio(float, float);
 	void resetView() {
-		_view.reset(sf::FloatRect(0, 0, 12, 24));
+		_view.reset(sf::FloatRect(0, 0, BOARD_WIDTH + 2, BOARD_HEIGHT + 2));
 	}
 	void setView(float width, float height) {
 		sf::FloatRect newView(- (width / CELL_WIDTH_HEIGHT / 2) + 6, 0, width / CELL_WIDTH_HEIGHT, height / CELL_WIDTH_HEIGHT);
