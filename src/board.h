@@ -5,7 +5,7 @@
 #include "tetro.h"
 
 const uint8_t BOARD_WIDTH = 10;
-const uint8_t BOARD_HEIGHT = 23;
+const uint8_t BOARD_HEIGHT = 22;
 
 // Rows are sorted maps from column index to block.
 typedef std::map<uint8_t, BoardBlock> Row;

@@ -9,8 +9,6 @@ void drawVertices(sf::Vertex*, const sf::Vector2f&);
 class Tetro;
 class Board;
 
-const uint8_t CELL_WIDTH_HEIGHT = 16;
-
 struct TetroBlock {
   public:
 	TetroBlock(int8_t, int8_t);

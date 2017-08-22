@@ -2,15 +2,14 @@
 #include <thread>
 #include "window.h"
 #include "logic.h"
-#include "drawing.h"
+#include "ui_element.h"
 
 namespace window {
 	namespace {
 		bool running = true;
 		sf::RenderWindow window;
-		sf::View boardView(sf::FloatRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT));
 		Logic logic;
-		AnimatedDrawing drawing(logic, window);
+		Interface interface(window, logic);
 
 		typedef std::map<sf::Keyboard::Key, std::shared_ptr<LogicCommand>> CommandMap;
 
@@ -23,25 +22,6 @@ namespace window {
 			{ sf::Keyboard::X, logic._command_factory->createRotateCommand(CW) }
 		};
 
-		void fit_board_to_screen(float width, float height) {
-			float boardRatio = (float) BOARD_WIDTH / (float) BOARD_HEIGHT;
-			float screenRatio = width / height;
-			float boardWidth = CELL_WIDTH_HEIGHT * BOARD_WIDTH;
-			float boardHeight = CELL_WIDTH_HEIGHT * BOARD_HEIGHT;
-			if (screenRatio > boardRatio) {
-				width = boardWidth * height / boardHeight / width;
-				height = 1;
-			} else {
-				height = boardHeight * width / boardWidth / height;
-				width = 1;
-			}
-			sf::FloatRect viewPort = sf::FloatRect(0.5 - width / 2,
-																						 0.5 - height / 2,
-																						 width,
-																						 height);
-			boardView.setViewport(viewPort);
-		}
-
 		bool handle_input() {
 			sf::Event event;
 			while (window.pollEvent(event)) {
@@ -50,7 +30,7 @@ namespace window {
 				}
 
 				if (event.type == sf::Event::Resized) {
-					fit_board_to_screen(event.size.width, event.size.height);
+					interface.resize(event.size.width, event.size.height);
 				}
 
 				if (event.type == sf::Event::KeyPressed) {
@@ -68,6 +48,7 @@ namespace window {
 							break;
 					}
 				}
+
 				if (event.type == sf::Event::MouseButtonPressed) {
 					//Handle GUI stuff
 				}
@@ -80,9 +61,11 @@ namespace window {
 		while (running) {
 			running = handle_input();
 			logic.update();
+
 			window.clear();
-			window.setView(boardView);
-			drawing.update();
+
+			interface.update();
+
 			window.display();
 			std::this_thread::sleep_for(std::chrono::milliseconds(16));
 		}

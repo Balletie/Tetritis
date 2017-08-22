@@ -1,24 +1,97 @@
 #ifndef UI_ELEMENT_H
 #define UI_ELEMENT_H
-
+#include <chrono>
 #include <SFML/Graphics.hpp>
 
-class UIElement : sf::Drawable {
-  public:
-	UIElement(sf::RenderTarget& target)
-		: _target(target)
-	{}
+#include "board.h"
+#include "macros.h"
+#include "animation.h"
+#include "matrices.h"
 
-	virtual const sf::View& getView() const {
-		return _target.getDefaultView();
+const uint8_t CELL_WIDTH_HEIGHT = 16;
+
+class Interface;
+
+class InterfaceElement {
+	friend Interface;
+
+  public:
+	InterfaceElement() {}
+	virtual void update(sf::RenderTarget&, sf::RenderStates);
+
+	virtual ~InterfaceElement() {}
+
+  protected:
+	// Target width and height in pixels.
+	virtual float width() = 0;
+	virtual float height() = 0;
+
+  protected:
+	sf::VertexArray createFrame();
+
+	sf::VertexArray _frame_vertices;
+};
+
+class AnimatedPlayfield : public InterfaceElement {
+  public:
+	AnimatedPlayfield(Logic&);
+	
+	void update(sf::RenderTarget&, sf::RenderStates) override;
+
+	float width() override {
+		return BOARD_WIDTH;
 	}
 
-	virtual void update() {
-		_target.setView(getView());
+	float height() override {
+		return BOARD_HEIGHT - 2;
+	}
+
+  private:
+	uint32_t restartClock();
+
+	std::chrono::steady_clock::time_point _start;
+
+  protected:
+	std::vector<std::unique_ptr<AnimatedDrawable>> _drawables;
+};
+
+class Interface {
+  public:
+	Interface(sf::RenderTarget& target, Logic& l)
+		: Interface(target, l, sf::View(sf::FloatRect(0, 0, 12, 24)))
+	{}
+
+	Interface(sf::RenderTarget& target, Logic& l, sf::View view)
+		: _target(target)
+		, _states(sf::RenderStates::Default)
+		, _view(view)
+	{
+		_elems.emplace_back(sf::Vector2u(0, 2), std::make_unique<AnimatedPlayfield>(l));
+	}
+
+	void update();
+	void resize(float, float);
+
+  protected:
+	// Target width and height in pixels.
+	float width();
+	float height();
+
+  private:
+  void keepAspectRatio(float, float);
+	void resetView() {
+		_view.reset(sf::FloatRect(0, 0, 12, 24));
+	}
+	void setView(float width, float height) {
+		sf::FloatRect newView(- (width / CELL_WIDTH_HEIGHT / 2) + 6, 0, width / CELL_WIDTH_HEIGHT, height / CELL_WIDTH_HEIGHT);
+		_view.reset(newView);
 	}
 
   protected:
 	sf::RenderTarget& _target;
+	sf::RenderStates _states;
+	sf::View _view;
+	std::vector<std::pair<sf::Vector2u, std::unique_ptr<InterfaceElement>>> _elems;
 };
 
 #endif /* UI_ELEMENT_H */
