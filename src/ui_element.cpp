@@ -1,14 +1,34 @@
-#include <algorithm>
+#include <iostream>
+#include <numeric>
+#include <functional>
 #include "matrices.h"
 #include "ui_element.h"
 #include "ghost_tetro.h"
 
+using namespace std::placeholders;
+
 float Interface::width() {
-	return CELL_WIDTH_HEIGHT * (BOARD_WIDTH + 2);
+	return CELL_WIDTH_HEIGHT * coordWidth();
 }
 
 float Interface::height() {
-	return CELL_WIDTH_HEIGHT * (BOARD_HEIGHT + 2);
+	return CELL_WIDTH_HEIGHT * coordHeight();
+}
+
+float Interface::coordWidth() {
+	std::vector<float> widths;
+	std::transform(_elems.begin(), _elems.end(), std::back_inserter(widths),
+								 [](auto& e) {
+									 return e.first.x + e.second->totalWidth(); });
+	return *(std::min_element(widths.begin(), widths.end()));
+}
+
+float Interface::coordHeight() {
+	std::vector<float> heights;
+	std::transform(_elems.begin(), _elems.end(), std::back_inserter(heights),
+								 [](auto& e) {
+									 return e.first.y + e.second->totalHeight(); });
+	return *(std::min_element(heights.begin(), heights.end()));
 }
 
 void Interface::update() {
@@ -67,21 +87,27 @@ void InterfaceElement::update(sf::RenderTarget& target, sf::RenderStates states)
 sf::VertexArray InterfaceElement::createFrame() {
 	sf::VertexArray vertices(sf::TriangleStrip, 15);
 	vertices[0].position  = sf::Vector2f(0, 0);
-	vertices[1].position  = sf::Vector2f(1, 1);
-	vertices[2].position  = sf::Vector2f(this->width() + 2, 0);
-	vertices[3].position  = sf::Vector2f(this->width() + 1, 1);
-	vertices[4].position  = sf::Vector2f(this->width() + 2, this->height() + 2);
-	vertices[5].position  = sf::Vector2f(this->width() + 1, this->height() + 1);
-	vertices[6].position  = sf::Vector2f(0, this->height() + 2);
-	vertices[7].position  = sf::Vector2f(1, this->height() + 1);
+	vertices[1].position  = sf::Vector2f(frameWidth(), frameWidth());
+	vertices[2].position  = sf::Vector2f(this->width() + 2 * frameWidth(), 0);
+	vertices[3].position  = sf::Vector2f(this->width() + frameWidth(), frameWidth());
+	vertices[4].position  = sf::Vector2f(this->width() + 2 * frameWidth(), this->height() + 2 * frameWidth());
+	vertices[5].position  = sf::Vector2f(this->width() + frameWidth(), this->height() + frameWidth());
+	vertices[6].position  = sf::Vector2f(0, this->height() + 2 * frameWidth());
+	vertices[7].position  = sf::Vector2f(frameWidth(), this->height() + frameWidth());
 	vertices[8].position  = sf::Vector2f(0, 0);
-	vertices[9].position  = sf::Vector2f(1, 1);
+	vertices[9].position  = sf::Vector2f(frameWidth(), frameWidth());
 
 	vertices[0].color = sf::Color::Red;
+	vertices[1].color = sf::Color::Red;
 	vertices[2].color = sf::Color::Blue;
-	vertices[4].color = sf::Color::Green;
-	vertices[6].color = sf::Color::Cyan;
+	vertices[3].color = sf::Color::Blue;
+	vertices[4].color = sf::Color::Blue;
+	vertices[5].color = sf::Color::Blue;
+	vertices[6].color = sf::Color::Red;
+	vertices[7].color = sf::Color::Red;
 	vertices[8].color = sf::Color::Red;
+	vertices[9].color = sf::Color::Red;
+
 	return vertices;
 }
 
@@ -107,7 +133,7 @@ AnimatedPlayfield::AnimatedPlayfield(Logic& l)
 
 void AnimatedPlayfield::update(sf::RenderTarget& target, sf::RenderStates states) {
 	InterfaceElement::update(target, states);
-	states.transform.translate(1, -1);
+	states.transform.translate(this->frameWidth(), this->frameWidth() - 2);
 
 	uint32_t dt = restartClock();
 	std::for_each(_drawables.begin(), _drawables.end(), [&](auto &d) {

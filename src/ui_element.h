@@ -25,6 +25,17 @@ class InterfaceElement {
 	// Target width and height in pixels.
 	virtual float width() = 0;
 	virtual float height() = 0;
+	virtual float frameWidth() {
+		return 1;
+	}
+	
+	virtual float totalWidth() {
+		return width() + frameWidth() * 2;
+	}
+	
+	virtual float totalHeight() {
+		return height() + frameWidth() * 2;
+	}
 
   protected:
 	sf::VertexArray createFrame();
@@ -45,6 +56,10 @@ class AnimatedPlayfield : public InterfaceElement {
 	float height() override {
 		return BOARD_HEIGHT - 2;
 	}
+	
+	float frameWidth() override {
+		return 0.5;
+	}
 
   private:
 	uint32_t restartClock();
@@ -58,15 +73,11 @@ class AnimatedPlayfield : public InterfaceElement {
 class Interface {
   public:
 	Interface(sf::RenderTarget& target, Logic& l)
-		: Interface(target, l, sf::View(sf::FloatRect(0, 0, BOARD_WIDTH + 2, BOARD_HEIGHT + 2)))
-	{}
-
-	Interface(sf::RenderTarget& target, Logic& l, sf::View view)
 		: _target(target)
 		, _states(sf::RenderStates::Default)
-		, _view(view)
 	{
 		_elems.emplace_back(sf::Vector2u(0, 2), std::make_unique<AnimatedPlayfield>(l));
+		this->resetView();
 	}
 
 	void update();
@@ -76,14 +87,16 @@ class Interface {
 	// Target width and height in pixels.
 	float width();
 	float height();
+	float coordWidth();
+	float coordHeight();
 
   private:
   void keepAspectRatio(float, float);
 	void resetView() {
-		_view.reset(sf::FloatRect(0, 0, BOARD_WIDTH + 2, BOARD_HEIGHT + 2));
+		_view.reset(sf::FloatRect(0, 0, coordWidth(), coordHeight()));
 	}
 	void setView(float width, float height) {
-		sf::FloatRect newView(- (width / CELL_WIDTH_HEIGHT / 2) + 6, 0, width / CELL_WIDTH_HEIGHT, height / CELL_WIDTH_HEIGHT);
+		sf::FloatRect newView(- (width / CELL_WIDTH_HEIGHT / 2) + coordWidth() / 2, 0, width / CELL_WIDTH_HEIGHT, height / CELL_WIDTH_HEIGHT);
 		_view.reset(newView);
 	}
 
