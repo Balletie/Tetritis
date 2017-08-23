@@ -3,7 +3,7 @@
 #include "tetro.h"
 #include "block.h"
 
-Tetro::Tetro(sf::Color c, BlockList blocks, const Tetro::WallKickOffsetRow (*wk_offsets)[4])
+Tetro::Tetro(sf::Color c, BlockList blocks, Tetro::WallKickOffsetRow (*wk_offsets)[4])
 	: _col(4), _row(1), _orntn(ZERO), _wall_kick_offsets(wk_offsets), _c(c)
 	, _blocks(blocks) {}
 
@@ -23,19 +23,19 @@ const sf::Color Tetro::Orange(239,121,33);
  * origin (the middle of the O block, which does not mark an actual block but
  * is inbetween blocks).
  */
-const Tetro::WallKickOffsetRow Tetro::jlstz_offsets[4] {
+Tetro::WallKickOffsetRow Tetro::jlstz_offsets[4] {
 	{{ 0, 0}, { 0, 0}, { 0, 0}, { 0, 0}, { 0, 0}},
 	{{ 0, 0}, {+1, 0}, {+1,-1}, { 0,+2}, {+1,+2}},
 	{{ 0, 0}, { 0, 0}, { 0, 0}, { 0, 0}, { 0, 0}},
 	{{ 0, 0}, {-1, 0}, {-1,-1}, { 0,+2}, {-1,+2}}
 };
-const Tetro::WallKickOffsetRow Tetro::i_offsets[4] {
+Tetro::WallKickOffsetRow Tetro::i_offsets[4] {
 	{{ 0, 0}, {-1, 0}, {+2, 0}, {-1, 0}, {+2, 0}},
 	{{-1, 0}, { 0, 0}, { 0, 0}, { 0,+1}, { 0,-2}},
 	{{-1,+1}, {+1,+1}, {-2,+1}, {+1, 0}, {-2, 0}},
 	{{ 0,+1}, { 0,+1}, { 0,+1}, { 0,-1}, { 0,+2}}
 };
-const Tetro::WallKickOffsetRow Tetro::o_offsets[4] {
+Tetro::WallKickOffsetRow Tetro::o_offsets[4] {
 	{{ 0, 0}},
 	{{ 0,-1}},
 	{{-1,-1}},

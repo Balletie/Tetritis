@@ -13,9 +13,8 @@ void AbstractLogic::update() {
 }
 
 Logic::Logic()
-	: _current_tetro(_tetro_factory.next())
-	, _command_factory(new BasicLogicCommandFactory(*this))
-	, _gravity_task(&Logic::gravity, this), _has_gravity(true)
+	: _command_factory(new BasicLogicCommandFactory(*this))
+	, _gravity_task(&Logic::gravity, this), _has_gravity(false)
 {}
 
 Logic::~Logic() {
@@ -24,11 +23,11 @@ Logic::~Logic() {
 }
 
 void Logic::record() {
-	std::pair<uint8_t, uint8_t> minmax_row = _board.record(_current_tetro);
+	std::pair<uint8_t, uint8_t> minmax_row = _board.record(currentTetro());
 	std::map<uint8_t, Board> removed_boards = _board.deleteFullRows(
 		minmax_row.first, minmax_row.second + 1);
-	_current_tetro = _tetro_factory.next();
 	this->callBack(LogicEvent::TetroAdded, removed_boards);
+	++_tetro_it;
 }
 
 void Logic::gravity() {
@@ -49,7 +48,7 @@ void BasicMoveCommand::perform() {
 				_logic.record();
 			}
 		} else {
-			_logic.getCurrentTetro() = t;
+			_logic.currentTetro() = t;
 			_logic.callBack(LogicEvent::Move, _dir);
 		}
 	} else {
@@ -64,7 +63,7 @@ void BasicRotateCommand::perform() {
 
 		if (!_logic.getBoard().isOutOfSideBounds(t) && !_logic.getBoard().collides(t)) {
 			Tetro::WallKickOffset off = t.getWallKickOffset(i);
-			_logic.getCurrentTetro() = t;
+			_logic.currentTetro() = t;
 			_logic.callBack(LogicEvent::Rotation, _rot, trans, off);
 			return;
 		}
@@ -74,7 +73,7 @@ void BasicRotateCommand::perform() {
 
 void BasicDropCommand::perform() {
 	Tetro cur = _logic.getCurrentTetro();
-	Tetro& t = _logic.getCurrentTetro();
+	Tetro& t = _logic.currentTetro();
 	uint8_t i = 0;
 	while (!_logic.getBoard().collides(cur)) {
 		t = cur;

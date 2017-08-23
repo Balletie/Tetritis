@@ -73,7 +73,7 @@ class AbstractLogic {
 		LogicEventCallbacks;
 
   public:
-	virtual Tetro& getCurrentTetro() = 0;
+	virtual Tetro& currentTetro() const = 0;
 	virtual Tetro getCurrentTetro() const = 0;
 	virtual const Board& getBoard() const = 0;
 
@@ -122,15 +122,15 @@ class Logic : public AbstractLogic {
   public:
 	Logic();
 
-	Tetro& getCurrentTetro() override {
-		return _current_tetro;
+	Tetro& currentTetro() const override {
+		return *(_tetro_it);
 	}
 
-	Tetro getCurrentTetro() const {
-		return _current_tetro;
+	Tetro getCurrentTetro() const override {
+		return *(_tetro_it);
 	}
 
-	const Board& getBoard() const {
+	const Board& getBoard() const override {
 		return _board;
 	}
 
@@ -148,10 +148,9 @@ class Logic : public AbstractLogic {
   private:
 	std::thread _gravity_task;
 	bool _has_gravity;
-	GuidelineTetroFactory _tetro_factory;
+	GuidelineTetroIterator _tetro_it;
 
 	Board _board;
-	Tetro _current_tetro;
 };
 
 class BasicMoveCommand : public LogicCommand {

@@ -114,7 +114,7 @@ sf::VertexArray InterfaceElement::createFrame() {
 AnimatedPlayfield::AnimatedPlayfield(Logic& l)
 	: _start(std::chrono::steady_clock::now())
 {
-	AnimatedTetro *t = new AnimatedTetro(l.getCurrentTetro());
+	AnimatedTetro *t = new AnimatedTetro(l.currentTetro());
 	l.addCallback(LogicEvent::Move, t->onMoved_cb());
 	l.addCallback(LogicEvent::Rotation, t->onRotated_cb());
 	l.addCallback(LogicEvent::Drop, t->onDropped_cb());

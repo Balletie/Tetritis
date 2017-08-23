@@ -7,10 +7,10 @@
 class GhostLogic : public AbstractLogic {
   public:
 	GhostLogic(Tetro& ghost, const Board& board)
-		: _ghost(ghost), _board(board) {
+		: _board(board), _ghost(ghost) {
 	}
 
-	Tetro& getCurrentTetro() override {
+	Tetro& currentTetro() const override {
 		return _ghost;
 	}
 
@@ -50,6 +50,6 @@ class GhostTetro : public AnimatedDrawable {
 	std::shared_ptr<LogicCommand> _drop_command;
 	GhostLogic _gl;
 	Tetro _ghost;
-	Tetro& _actual;
+	const Tetro& _actual;
 };
 #endif /* GHOST_TETRO_H */

@@ -2,7 +2,7 @@
 
 GhostTetro::GhostTetro(AbstractLogic& l)
 	: _ghost(l.getCurrentTetro())
-	, _actual(l.getCurrentTetro())
+	, _actual(l.currentTetro())
 	, _gl(_ghost, l.getBoard())
 	, _drop_command(BasicLogicCommandFactory(_gl).createDropCommand())
 {
