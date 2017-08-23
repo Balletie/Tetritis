@@ -1,15 +1,12 @@
 #include "ghost_tetro.h"
 
-GhostTetro::GhostTetro(AbstractLogic& l)
-	: _ghost(l.getCurrentTetro())
-	, _actual(l.currentTetro())
-	, _gl(_ghost, l.getBoard())
-	, _drop_command(BasicLogicCommandFactory(_gl).createDropCommand())
+GhostTetro::GhostTetro(Tetro& t, Board& b)
+	: _actual(t)
+	, _ghost(_actual)
+	, _gl(_ghost, b)
+	, _drop_command(BasicLogicCommandFactory<GhostLogic>(_gl).createDropCommand())
 {
 	updateGhost();
-	l.addCallback(LogicEvent::Move, this->onMoved_cb());
-	l.addCallback(LogicEvent::Rotation, this->onRotated_cb());
-	l.addCallback(LogicEvent::Drop, this->onDropped_cb());
 }
 
 void GhostTetro::updateGhost() {

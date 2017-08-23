@@ -4,42 +4,52 @@
 #include "animation.h"
 #include "tetro.h"
 
-class GhostLogic : public AbstractLogic {
+class GhostLogic : public detail::LogicBase<GhostLogic> {
   public:
-	GhostLogic(Tetro& ghost, const Board& board)
+	friend logic_access;
+
+	GhostLogic(Tetro& ghost, Board& board)
 		: _board(board), _ghost(ghost) {
 	}
 
-	Tetro& currentTetro() const override {
+  private:
+	Tetro& getCurrentTetro_int() {
 		return _ghost;
 	}
 
-	Tetro getCurrentTetro() const override {
-		return _ghost;
-	}
-
-	const Board& getBoard() const override {
+	Board& getBoard_int() {
 		return _board;
 	}
 
-	void record() override {
+	void record() {
 		// Do nothing.
 	}
 
-	const Board& _board;
+	Board& _board;
 	Tetro& _ghost;
 };
 
 class GhostTetro : public AnimatedDrawable {
   public:
-	GhostTetro(AbstractLogic&);
 
 	REGISTER_CALLBACK(onMoved, direction)
 	REGISTER_CALLBACK(onRotated, rotation, Tetro::WallKickTranslation,
 		Tetro::WallKickOffset)
 	REGISTER_CALLBACK(onDropped, uint8_t)
 
+	template <class SomeLogic>
+	static GhostTetro *make_ghost(SomeLogic& l) {
+		GhostTetro *ghost = new GhostTetro(logic_access::getCurrentTetro(l),
+																			 logic_access::getBoard(l));
+		l.addCallback(LogicEvent::Move, ghost->onMoved_cb());
+		l.addCallback(LogicEvent::Rotation, ghost->onRotated_cb());
+		l.addCallback(LogicEvent::Drop, ghost->onDropped_cb());
+		return ghost;
+	}
+
   protected:
+	GhostTetro(Tetro&, Board&);
+
 	void step(uint32_t dt) override;
 
 	void updateGhost();
@@ -47,9 +57,9 @@ class GhostTetro : public AnimatedDrawable {
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
   private:
-	std::shared_ptr<LogicCommand> _drop_command;
+	std::shared_ptr<LogicCommand<GhostLogic>> _drop_command;
 	GhostLogic _gl;
-	Tetro _ghost;
 	const Tetro& _actual;
+	Tetro _ghost;
 };
 #endif /* GHOST_TETRO_H */

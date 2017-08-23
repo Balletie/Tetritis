@@ -11,7 +11,7 @@ namespace window {
 		Logic logic;
 		Interface interface(window, logic);
 
-		typedef std::map<sf::Keyboard::Key, std::shared_ptr<LogicCommand>> CommandMap;
+		typedef std::map<sf::Keyboard::Key, std::shared_ptr<LogicCommand<Logic>>> CommandMap;
 
 		CommandMap command_for_key = {
 			{ sf::Keyboard::Left, logic._command_factory->createMoveCommand(DIR_LEFT) },

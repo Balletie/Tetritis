@@ -4,6 +4,7 @@
 #include <array>
 #include <deque>
 #include <random>
+#include <iterator>
 #include <memory>
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/generator_iterator.hpp>
@@ -20,11 +21,13 @@
 #include "block.h"
 #include "movements.h"
 
-class TetroFactory;
+class TetroFactoryBase;
 class GhostTetro;
 
 class Tetro : public sf::Drawable {
 	friend GhostTetro;
+	friend TetroFactoryBase;
+
 	public:
 
 	typedef std::vector<TetroBlock> BlockList;
@@ -32,8 +35,6 @@ class Tetro : public sf::Drawable {
 	typedef std::pair<int8_t, int8_t> WallKickOffset;
 	typedef std::pair<int8_t, int8_t> WallKickTranslation;
 	typedef std::vector<WallKickOffset> WallKickOffsetRow;
-
-	friend class AbstractTetroFactory;
 
 	const const_iterator begin() const {
 		return this->_blocks.begin();
@@ -120,7 +121,7 @@ class Tetro : public sf::Drawable {
 	BlockList _blocks;
 };
 
-class AbstractTetroFactory {
+class TetroFactoryBase {
   public:
 	typedef Tetro (* TetroCreator)();
 
@@ -177,43 +178,6 @@ class AbstractTetroFactory {
 
 template <class TetroFactory, class Tet, std::size_t n>
 class TetroIterator;
-
-class GuidelineTetroFactory : AbstractTetroFactory {
-  public:
-	GuidelineTetroFactory() : _random_generator(std::random_device{}()), it(_creators.end()) {}
-	GuidelineTetroFactory(const GuidelineTetroFactory& gt)
-		: _random_generator(gt._random_generator)
-	{
-		_creators = gt._creators;
-		it = _creators.begin();
-		std::advance(it, std::distance(gt._creators.begin(), (std::array<TetroCreator, 7>::const_iterator) gt.it));
-	}
-
-	typedef TetroIterator<GuidelineTetroFactory, Tetro, 3> iterator;
-	typedef TetroIterator<GuidelineTetroFactory, const Tetro, 3> const_iterator;
-
-	Tetro next() {
-		if (it == _creators.end()) {
-			std::shuffle(_creators.begin(), _creators.end(), _random_generator);
-			it = _creators.begin();
-		}
-		return (*it++)();
-	}
-
-	Tetro operator() () {
-		return this->next();
-	}
-
-  private:
-	friend class TetroIterator<GuidelineTetroFactory, Tetro, 3>;
-	friend class TetroIterator<GuidelineTetroFactory, const Tetro, 3>;
-
-	std::array<TetroCreator, 7> _creators {{
-		&createI, &createJ, &createL, &createO, &createS, &createT, &createZ
-	}};
-	std::mt19937 _random_generator;
-	std::array<TetroCreator, 7>::iterator it;
-};
 
 template <class TetroFactory, class Tet, std::size_t n>
 class TetroIterator : public boost::iterator_facade <
@@ -276,6 +240,53 @@ class TetroIterator : public boost::iterator_facade <
 	std::shared_ptr<TetroFactory> _tf;
 	mutable std::deque<std::remove_const_t<Tet>> _buf;
 	uint8_t _pos;
+};
+
+class GuidelineTetroFactory : TetroFactoryBase {
+  public:
+	GuidelineTetroFactory() : _random_generator(std::random_device{}()), it(_creators.end()) {}
+	GuidelineTetroFactory(const GuidelineTetroFactory& gt)
+		: _random_generator(gt._random_generator)
+	{
+		_creators = gt._creators;
+		it = _creators.begin();
+		std::advance(it, std::distance(gt._creators.begin(), (std::array<TetroCreator, 7>::const_iterator) gt.it));
+	}
+
+	typedef TetroIterator<GuidelineTetroFactory, Tetro, 3> iterator;
+	typedef TetroIterator<GuidelineTetroFactory, const Tetro, 3> const_iterator;
+
+	iterator begin() {
+		return iterator(this);
+	}
+
+	iterator end() {
+		iterator&& begin = this->begin();
+		std::advance(begin, 3);
+		return begin;
+	}
+
+	Tetro next() {
+		if (it == _creators.end()) {
+			std::shuffle(_creators.begin(), _creators.end(), _random_generator);
+			it = _creators.begin();
+		}
+		return (*it++)();
+	}
+
+	Tetro operator() () {
+		return this->next();
+	}
+
+  private:
+	friend class TetroIterator<GuidelineTetroFactory, Tetro, 3>;
+	friend class TetroIterator<GuidelineTetroFactory, const Tetro, 3>;
+
+	std::array<TetroCreator, 7> _creators {{
+		&createI, &createJ, &createL, &createO, &createS, &createT, &createZ
+	}};
+	std::mt19937 _random_generator;
+	std::array<TetroCreator, 7>::iterator it;
 };
 
 typedef GuidelineTetroFactory::iterator GuidelineTetroIterator;

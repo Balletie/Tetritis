@@ -16,7 +16,7 @@ class TransformingDrawable : public AnimatedDrawable {
 	static_assert(std::is_base_of<sf::Drawable, Dr>::value, "sf::Drawable should be a base of Dr");
 
   public:
-	TransformingDrawable(Dr& drawable, tweeny::tween<T, Ts...> t)
+	TransformingDrawable(const Dr& drawable, tweeny::tween<T, Ts...> t)
 		: _drawable(drawable), _tween(t) {};
 	void step(uint32_t dt) {
 		_tween.step(dt);
@@ -36,7 +36,7 @@ class TransformingDrawable : public AnimatedDrawable {
 
 class AnimatedTetro : public TransformingDrawable<Tetro, float, float> {
   public:
-	AnimatedTetro(Tetro& t) : TransformingDrawable(t, tweeny::from(0.f,0.f).to(0.f,0.f).during(1)) {};
+	AnimatedTetro(const Tetro& t) : TransformingDrawable(t, tweeny::from(0.f,0.f).to(0.f,0.f).during(1)) {};
 
 	REGISTER_CALLBACK(onMoved, direction)
 	REGISTER_CALLBACK(onRotated, rotation, Tetro::WallKickTranslation,

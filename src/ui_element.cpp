@@ -114,7 +114,7 @@ sf::VertexArray InterfaceElement::createFrame() {
 AnimatedPlayfield::AnimatedPlayfield(Logic& l)
 	: _start(std::chrono::steady_clock::now())
 {
-	AnimatedTetro *t = new AnimatedTetro(l.currentTetro());
+	AnimatedTetro *t = new AnimatedTetro(l.getCurrentTetro());
 	l.addCallback(LogicEvent::Move, t->onMoved_cb());
 	l.addCallback(LogicEvent::Rotation, t->onRotated_cb());
 	l.addCallback(LogicEvent::Drop, t->onDropped_cb());
@@ -122,7 +122,7 @@ AnimatedPlayfield::AnimatedPlayfield(Logic& l)
 	AnimatedBoard *b = new AnimatedBoard(l.getBoard());
 	l.addCallback(LogicEvent::TetroAdded, b->onTetroAdded_cb());
 
-	GhostTetro *gt = new GhostTetro(l);
+	GhostTetro *gt = GhostTetro::make_ghost(l);
 
 	_drawables.emplace_back(t);
 	_drawables.emplace_back(b);
