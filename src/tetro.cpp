@@ -62,7 +62,7 @@ sf::Color Tetro::getColor() const {
 	return this->_c;
 }
 
-void Tetro::translate(uint8_t x, uint8_t y) {
+void Tetro::translate(int8_t x, int8_t y) {
 	this->_col += x;
 	this->_row -= y;
 }

@@ -34,8 +34,13 @@ float Interface::coordHeight() {
 void Interface::update() {
 	_target.setView(_view);
 	std::for_each(_elems.begin(), _elems.end(), [&](auto &locToElem) {
-		sf::Vector2i l = locToElem.first;
-		locToElem.second->update(_target, translation_mat(l.x, l.y));
+		sf::Vector2i& l = locToElem.first;
+		std::unique_ptr<InterfaceElement>& e = locToElem.second;
+		sf::Transform trans = translation_mat(l.x, l.y);
+		sf::Transform frameTrans = trans;
+
+		e->update(_target, frameTrans.translate(e->frameWidth(), e->frameWidth()));
+		e->drawFrame(_target, trans);
 	});
 }
 
@@ -70,7 +75,7 @@ void Interface::keepAspectRatio(float screenWidth, float screenHeight) {
 	_view.setViewport(viewPort);
 }
 
-void InterfaceElement::update(sf::RenderTarget& target, sf::RenderStates states) {
+void InterfaceElement::drawFrame(sf::RenderTarget& target, sf::RenderStates states) {
 	target.draw(_frame_vertices, states);
 }
 
@@ -132,9 +137,7 @@ AnimatedPlayfield::AnimatedPlayfield(Logic& l)
 }
 
 void AnimatedPlayfield::update(sf::RenderTarget& target, sf::RenderStates states) {
-	InterfaceElement::update(target, states);
-	states.transform.translate(this->frameWidth(), this->frameWidth() - 2);
-
+	states.transform.translate(0, -2);
 	uint32_t dt = restartClock();
 	std::for_each(_drawables.begin(), _drawables.end(), [&](auto &d) {
 		d->step(dt);
@@ -149,18 +152,26 @@ uint32_t AnimatedPlayfield::restartClock() {
 	return dt.count();
 }
 
-TetroPreview::TetroPreview(Logic& l)
+NextTetroPreview::NextTetroPreview(Logic& l)
 	: _tetro_factory(l.getFactory())
 {
 	_frame_vertices = createFrame();
 }
 
-void TetroPreview::update(sf::RenderTarget& target, sf::RenderStates states) {
-	InterfaceElement::update(target, states);
-	states.transform.translate(this->frameWidth(), this->frameWidth());
-	
-	std::for_each(_tetro_factory.begin(), _tetro_factory.end(), [&](auto t) {
-		states.transform.translate(5, 0);
+void NextTetroPreview::update(sf::RenderTarget& target, sf::RenderStates states) {
+	target.draw(*_tetro_factory.begin(), states);
+}
+
+SubsequentTetrosPreview::SubsequentTetrosPreview(Logic& l)
+	: _tetro_factory(l.getFactory())
+{
+	_frame_vertices = createFrame();
+}
+
+void SubsequentTetrosPreview::update(sf::RenderTarget& target, sf::RenderStates states) {
+	states.transform.scale(0.75, 0.75).translate(-2.25, .25);
+	std::for_each(++_tetro_factory.begin(), _tetro_factory.end(), [&](auto &t) {
 		target.draw(t, states);
+		states.transform.translate(0, 2.75);
 	});
 }

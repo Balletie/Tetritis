@@ -95,6 +95,7 @@ class Tetro : public sf::Drawable {
 	WallKickOffset getWallKickOffset(uint8_t);
 
 	WallKickTranslation rotate(rotation, uint8_t = 0);
+	void translate(int8_t, int8_t);
 	void move(direction);
 
 	static const sf::Color Cyan;
@@ -114,7 +115,6 @@ class Tetro : public sf::Drawable {
 	void draw(sf::RenderTarget&, sf::RenderStates) const override;
 
   private:
-	void translate(uint8_t, uint8_t);
 	WallKickTranslation getWallKickTranslation(rotation, uint8_t);
 
 	uint8_t _col;

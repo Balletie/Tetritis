@@ -192,6 +192,8 @@ class Logic : public detail::LogicBase<Logic> {
 		return _board;
 	}
 
+	void spawnNext();
+
 	std::thread _gravity_task;
 	bool _has_gravity;
 	std::unique_ptr<GuidelineTetroFactory> _tetro_factory;

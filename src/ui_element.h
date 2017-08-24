@@ -17,7 +17,7 @@ class InterfaceElement {
 
   public:
 	InterfaceElement() {}
-	virtual void update(sf::RenderTarget&, sf::RenderStates);
+	virtual void update(sf::RenderTarget&, sf::RenderStates) = 0;
 
 	virtual ~InterfaceElement() {}
 
@@ -39,6 +39,7 @@ class InterfaceElement {
 
   protected:
 	sf::VertexArray createFrame();
+	void drawFrame(sf::RenderTarget&, sf::RenderStates);
 
 	sf::VertexArray _frame_vertices;
 };
@@ -58,7 +59,7 @@ class AnimatedPlayfield : public InterfaceElement {
 	}
 	
 	float frameWidth() override {
-		return 0.5;
+		return 0.25;
 	}
 
   private:
@@ -70,9 +71,9 @@ class AnimatedPlayfield : public InterfaceElement {
 	std::vector<std::unique_ptr<AnimatedDrawable>> _drawables;
 };
 
-class TetroPreview : public InterfaceElement {
+class NextTetroPreview : public InterfaceElement {
   public:
-	TetroPreview(Logic&);
+	NextTetroPreview(Logic&);
 	
 	void update(sf::RenderTarget&, sf::RenderStates) override;
 
@@ -85,12 +86,35 @@ class TetroPreview : public InterfaceElement {
 	}
 	
 	float frameWidth() override {
-		return 0.5;
+		return 0;
 	}
 
   private:
 	const Logic::tetro_factory& _tetro_factory;
 };
+
+class SubsequentTetrosPreview : public InterfaceElement {
+  public:
+	SubsequentTetrosPreview(Logic&);
+	
+	void update(sf::RenderTarget&, sf::RenderStates) override;
+
+	float width() override {
+		return 4;
+	}
+
+	float height() override {
+		return 2 * std::distance(_tetro_factory.begin(), _tetro_factory.end()) - 2;
+	}
+	
+	float frameWidth() override {
+		return 0.25;
+	}
+
+  private:
+	const Logic::tetro_factory& _tetro_factory;
+};
+
 
 class Interface {
   public:
@@ -99,7 +123,8 @@ class Interface {
 		, _states(sf::RenderStates::Default)
 	{
 		_elems.emplace_back(sf::Vector2i(0, 3), std::make_unique<AnimatedPlayfield>(l));
-		_elems.emplace_back(sf::Vector2i(0, 0), std::make_unique<TetroPreview>(l));
+		_elems.emplace_back(sf::Vector2i(0, 1), std::make_unique<NextTetroPreview>(l));
+		_elems.emplace_back(sf::Vector2i(BOARD_WIDTH + 1, 3), std::make_unique<SubsequentTetrosPreview>(l));
 		this->resetView();
 	}
 
