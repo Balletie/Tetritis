@@ -20,7 +20,7 @@ float Interface::coordWidth() {
 	std::transform(_elems.begin(), _elems.end(), std::back_inserter(widths),
 								 [](auto& e) {
 									 return e.first.x + e.second->totalWidth(); });
-	return *(std::min_element(widths.begin(), widths.end()));
+	return *(std::max_element(widths.begin(), widths.end()));
 }
 
 float Interface::coordHeight() {
@@ -28,13 +28,13 @@ float Interface::coordHeight() {
 	std::transform(_elems.begin(), _elems.end(), std::back_inserter(heights),
 								 [](auto& e) {
 									 return e.first.y + e.second->totalHeight(); });
-	return *(std::min_element(heights.begin(), heights.end()));
+	return *(std::max_element(heights.begin(), heights.end()));
 }
 
 void Interface::update() {
 	_target.setView(_view);
 	std::for_each(_elems.begin(), _elems.end(), [&](auto &locToElem) {
-		sf::Vector2u l = locToElem.first;
+		sf::Vector2i l = locToElem.first;
 		locToElem.second->update(_target, translation_mat(l.x, l.y));
 	});
 }
@@ -85,7 +85,7 @@ void InterfaceElement::update(sf::RenderTarget& target, sf::RenderStates states)
 //  | / __--``  `\|
 //  6 ----------- 4
 sf::VertexArray InterfaceElement::createFrame() {
-	sf::VertexArray vertices(sf::TriangleStrip, 15);
+	sf::VertexArray vertices(sf::TriangleStrip, 10);
 	vertices[0].position  = sf::Vector2f(0, 0);
 	vertices[1].position  = sf::Vector2f(frameWidth(), frameWidth());
 	vertices[2].position  = sf::Vector2f(this->width() + 2 * frameWidth(), 0);
@@ -147,4 +147,20 @@ uint32_t AnimatedPlayfield::restartClock() {
 	std::chrono::milliseconds dt = std::chrono::duration_cast<std::chrono::milliseconds>(end - _start);
 	_start = end;
 	return dt.count();
+}
+
+TetroPreview::TetroPreview(Logic& l)
+	: _tetro_factory(l.getFactory())
+{
+	_frame_vertices = createFrame();
+}
+
+void TetroPreview::update(sf::RenderTarget& target, sf::RenderStates states) {
+	InterfaceElement::update(target, states);
+	states.transform.translate(this->frameWidth(), this->frameWidth());
+	
+	std::for_each(_tetro_factory.begin(), _tetro_factory.end(), [&](auto t) {
+		states.transform.translate(5, 0);
+		target.draw(t, states);
+	});
 }

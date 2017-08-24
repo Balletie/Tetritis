@@ -3,7 +3,8 @@
 Logic::Logic()
 	: _command_factory(new BasicLogicCommandFactory<Logic>(*this))
 	, _gravity_task(&Logic::gravity, this), _has_gravity(false)
-	, _tetro(_tetro_factory.next())
+	, _tetro_factory(new GuidelineTetroFactory())
+	, _tetro(_tetro_factory->next())
 {}
 
 Logic::~Logic() {
@@ -15,7 +16,7 @@ void Logic::record() {
 	std::pair<uint8_t, uint8_t> minmax_row = _board.record(_tetro);
 	std::map<uint8_t, Board> removed_boards = _board.deleteFullRows(
 		minmax_row.first, minmax_row.second + 1);
-	_tetro = _tetro_factory.next();
+	_tetro = _tetro_factory->next();
 	this->callBack(LogicEvent::TetroAdded, removed_boards);
 }
 

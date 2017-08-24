@@ -13,6 +13,10 @@ struct TetroBlock {
   public:
 	TetroBlock(int8_t, int8_t);
 
+	bool operator== (const TetroBlock& other) const {
+		return this->_x == other._x && this->_y == other._y;
+	}
+
   protected:
 	friend class Tetro;
 

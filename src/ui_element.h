@@ -70,13 +70,36 @@ class AnimatedPlayfield : public InterfaceElement {
 	std::vector<std::unique_ptr<AnimatedDrawable>> _drawables;
 };
 
+class TetroPreview : public InterfaceElement {
+  public:
+	TetroPreview(Logic&);
+	
+	void update(sf::RenderTarget&, sf::RenderStates) override;
+
+	float width() override {
+		return BOARD_WIDTH;
+	}
+
+	float height() override {
+		return 2;
+	}
+	
+	float frameWidth() override {
+		return 0.5;
+	}
+
+  private:
+	const Logic::tetro_factory& _tetro_factory;
+};
+
 class Interface {
   public:
 	Interface(sf::RenderTarget& target, Logic& l)
 		: _target(target)
 		, _states(sf::RenderStates::Default)
 	{
-		_elems.emplace_back(sf::Vector2u(0, 2), std::make_unique<AnimatedPlayfield>(l));
+		_elems.emplace_back(sf::Vector2i(0, 3), std::make_unique<AnimatedPlayfield>(l));
+		_elems.emplace_back(sf::Vector2i(0, 0), std::make_unique<TetroPreview>(l));
 		this->resetView();
 	}
 
@@ -104,7 +127,7 @@ class Interface {
 	sf::RenderTarget& _target;
 	sf::RenderStates _states;
 	sf::View _view;
-	std::vector<std::pair<sf::Vector2u, std::unique_ptr<InterfaceElement>>> _elems;
+	std::vector<std::pair<sf::Vector2i, std::unique_ptr<InterfaceElement>>> _elems;
 };
 
 #endif /* UI_ELEMENT_H */

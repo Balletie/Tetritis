@@ -156,7 +156,9 @@ class Logic : public detail::LogicBase<Logic> {
 
 	Logic();
 
-	const tetro_factory& getFactory() const;
+	const tetro_factory& getFactory() const {
+		return *_tetro_factory;
+	}
 
 	const Board& getBoard() const {
 		return _board;
@@ -192,7 +194,7 @@ class Logic : public detail::LogicBase<Logic> {
 
 	std::thread _gravity_task;
 	bool _has_gravity;
-	mutable GuidelineTetroFactory _tetro_factory;
+	std::unique_ptr<GuidelineTetroFactory> _tetro_factory;
 
 	Tetro _tetro;
 	Board _board;
